@@ -1,4 +1,4 @@
 ETA
 ===
 
-Estimated Time Of Arrival(ETA) Android Project For CSC-780
+Estimated Time Of Arrival(ETA)- **Android Project For Application Development for Mobile Devices**  Fall 2014
