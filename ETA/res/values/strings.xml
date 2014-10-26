@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ETA</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="bt_send_eta">Send ETA</string>
+    <string name="tv_contact_name">contact name</string>
+
+</resources>
