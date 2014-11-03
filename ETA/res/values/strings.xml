@@ -6,5 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="bt_send_eta">Send ETA</string>
     <string name="tv_contact_name">contact name</string>
+    <string name="iv_contact_image_desc">ETA receiver contact image</string>
 
 </resources>

@@ -12,14 +12,14 @@ public class ViewETAActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.view_eta);
-
+  
+		// Accessing map fragment to configure it
 		map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
 				.getMap();
 
 		if (map!=null){
 			map.setMapType(GoogleMap.MAP_TYPE_HYBRID);
-			map.setMyLocationEnabled(true);
-			map.setPadding(0, 50, 0, 0);
+			map.setMyLocationEnabled(true);// shows current location
 			
 		}
 	}

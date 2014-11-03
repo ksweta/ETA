@@ -6,12 +6,12 @@
 
     <ImageView
         android:id="@+id/iv_contact_image"
+        android:contentDescription="@string/iv_contact_image_desc"
         android:layout_width="200dip"
         android:layout_height="200dip"
-        android:layout_marginLeft="3dip"
         android:scaleType="centerInside"
         android:layout_centerInParent="true"
-        android:src="@drawable/ic_contact_picture" />
+        android:src="@drawable/default_contact_image" />
     
     <TextView 
         android:id="@+id/tv_contact_name"
@@ -24,9 +24,11 @@
     
     <Button 
         android:id="@+id/bt_send_eta"
+        android:onClick="sendEta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        
         android:layout_marginTop="50dip"
         android:layout_below="@id/tv_contact_name"
         android:text="@string/bt_send_eta"  
