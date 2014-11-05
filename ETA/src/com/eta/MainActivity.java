@@ -27,7 +27,7 @@ public class MainActivity extends Activity {
 
 	private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private final static String TAG = MainActivity.class.getSimpleName();
-	public static final String PROPERTY_GCM_REG_ID = "registration_id";
+	public static final String PROPERTY_GCM_REG_ID = "gcm_registration_id";
 	private static final String PROPERTY_APP_VERSION = "appVersion";
 	 /**
      * Substitute sender ID here. This is the project number
@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
-        
+     // Check device for Play Services APK.
         if (checkPlayServices()) {
             // If this check succeeds, proceed with normal processing.
             // Otherwise, prompt user to get valid Play Services APK.
@@ -58,12 +58,13 @@ public class MainActivity extends Activity {
             }
         
         }
+        
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        //need to do the Play Services APK check here too.
+        //need to check Play Services APK  here too.
         checkPlayServices();
     }
     
@@ -104,6 +105,10 @@ public class MainActivity extends Activity {
 			intent = new Intent(this, ViewETAActivity.class);
 			break;
 		
+		case R.id.button4:
+			intent = new Intent(this, RegistrationActivity.class);
+			break;
+			
 		default:
 			Toast.makeText(this, "There is no such button", Toast.LENGTH_SHORT).show();
 			return;
@@ -121,8 +126,9 @@ public class MainActivity extends Activity {
     	int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
     	if (resultCode != ConnectionResult.SUCCESS) {
             if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                GooglePlayServicesUtil.getErrorDialog(resultCode, 
+                									  this,
+                									  PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
                 Log.i(TAG, "This device is not supported."); 
                 // if Google play service is not found and error is not 
@@ -130,7 +136,7 @@ public class MainActivity extends Activity {
                 // the application.
                 Builder alert = new AlertDialog.Builder(this);
                 alert.setTitle("Google Play Service missing");
-                alert.setMessage("Could not find Google Play Services. Please install");
+                alert.setMessage("This device is not supported");
                 alert.setNegativeButton("OK", null);
                 alert.show();
                 finish();
@@ -216,7 +222,6 @@ public class MainActivity extends Activity {
                     storeRegistrationId(context, gcmRegId);
 
                     // Send the GCM registration id to server over HTTP,
-                    // so it can use GCM/HTTP or CCS to send messages to App.
                     sendRegistrationIdToBackendServer(gcmRegId);
     
                 } catch (IOException ex) {
@@ -236,10 +241,7 @@ public class MainActivity extends Activity {
         }.execute(null, null, null);
     }
     /**
-    * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP
-    * or CCS to send messages to your app. Not needed for this demo since the
-    * device sends upstream messages to a server that echoes back the message
-    * using the 'from' address in the message.
+    * Sends the registration ID to your server over HTTP
     */
    private void sendRegistrationIdToBackendServer(String gcmRegistrationId) {
        //TODO: This method will send the GCM registration ID to backend server

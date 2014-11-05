@@ -15,9 +15,15 @@ import android.util.Log;
 
 public class GcmIntentService extends IntentService {
 
-	public static final int NOTIFICATION_ID = 1;
+	public static final int NOTIFICATION_ID         = 1;
+	private static final String GCM_MSG_SENDER_PHONE_NUMBER = "GCM_MSG_SENDER_PHONE_NUMBER";
+	private static final String GCM_MSG_SENDER_NAME  	    = "GCM_MSG_SENDER_NAME";
+	private static final String GCM_MSG_LONGITUDE    	    = "GCM_MSG_LONGITUDE";
+	private static final String GCM_MSG_LATITUDE            = "GCM_MSG_LATITUDE";
+	private static final String GCM_MSG_ETA                 = "GCM_MSG_ETA";
+	
     private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
+    private NotificationCompat.Builder builder;
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -39,23 +45,14 @@ public class GcmIntentService extends IntentService {
              * not interested in, or that you don't recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                sendNotification("Send error: " + extras.toString());
+                Log.i(TAG, "Send error: " + extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                sendNotification("Deleted messages on server: " + extras.toString());
+                Log.i(TAG, "Deleted messages on server: " + extras.toString());
             // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-                // This loop represents the service doing some work.
-                for (int i = 0; i < 5; i++) {
-                    Log.i(TAG, "Working... " + (i + 1)
-                            + "/5 @ " + SystemClock.elapsedRealtime());
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                    }
-                }
-                Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
+               
                 // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
+                sendNotification(extras);
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -65,22 +62,50 @@ public class GcmIntentService extends IntentService {
 
     // Put the message into a notification and post it.
     
-    private void sendNotification(String msg) {
+    private void sendNotification(Bundle bundle) {
+    	String senderName = bundle.getString(GCM_MSG_SENDER_NAME);
+    	String senderPhone = bundle.getString(GCM_MSG_SENDER_PHONE_NUMBER);
+    	Double longitude = bundle.getDouble(GCM_MSG_LONGITUDE);
+    	Double latitude = bundle.getDouble(GCM_MSG_LATITUDE);
+    	//TODO ETA in seconds, I can improve the formatting later.
+    	Integer eta = bundle.getInt(GCM_MSG_ETA);
+    	String bigText = String.format("%s's ETA %d sec.", senderName, eta);
+    	//TODO improve the message, make it more meaningful.
+    	String contentTextFormat = "%s's is running late. he is currently at Long %d, Lat %d."
+    								+ " He will arrive in %d seconds";
+    	String contentText = String.format(contentTextFormat, 
+    									   senderName, 
+    									   longitude,
+    									   latitude,
+    									   eta);
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, ViewETAActivity.class), 0);
-
+        // This intent will have almost the same parameters that are passed in
+        // GCM broadcast intent. These parameters will be used by View Activity 
+        // to show the sender on the map.
+        Intent viewETAIntent = new Intent(this, ViewETAActivity.class);
+        viewETAIntent.putExtras(bundle);
+        
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 
+        														0,
+        														viewETAIntent,
+        														0);
+        
+        
+        //Prepare the notification
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
         .setSmallIcon(R.drawable.eta_notification)
-        .setContentTitle("GCM Notification")
+        .setContentTitle("ETA Notification")
         .setStyle(new NotificationCompat.BigTextStyle()
-        .bigText(msg))
-        .setContentText(msg);
-
+        .bigText(bigText))
+        .setContentText(contentText);
+        
+        //Set the content intent. This intent will launch the ViewETAActicity
         mBuilder.setContentIntent(contentIntent);
+        
+        //Time to show the notification.
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
-    }
+    }																										
 }
