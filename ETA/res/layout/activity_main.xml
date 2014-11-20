@@ -47,6 +47,13 @@
         android:layout_gravity="center"
         android:text="register me"   
         />
-   
+    <Button
+        android:id="@+id/button5"
+        android:onClick="onClick"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" 
+        android:layout_gravity="center"
+        android:text="log GCM registration id"   
+        />
 
 </LinearLayout>

@@ -24,20 +24,16 @@ import android.widget.Toast;
 
 
 public class MainActivity extends Activity {
-
 	private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private final static String TAG = MainActivity.class.getSimpleName();
 	public static final String PROPERTY_GCM_REG_ID = "gcm_registration_id";
 	private static final String PROPERTY_APP_VERSION = "appVersion";
-	 /**
-     * Substitute sender ID here. This is the project number
-     * from the API Console, as described in "Getting Started."
-     */
-	//TODO
-    String SENDER_ID = "Your-Sender-ID";
+	
+	//server project ID 
+    String GCM_SERVER_PROJECT_ID = "177762432832";
     
 	private GoogleCloudMessaging gcm;
-	private String gcmRegId;
+	private String gcmClientRegId;
 	
 	 
 	
@@ -51,9 +47,9 @@ public class MainActivity extends Activity {
             // If this check succeeds, proceed with normal processing.
             // Otherwise, prompt user to get valid Play Services APK.
             gcm = GoogleCloudMessaging.getInstance(this);
-            gcmRegId = getRegistrationId(this);
+            gcmClientRegId = getRegistrationId(this);
             
-            if (gcmRegId.isEmpty()) {
+            if (gcmClientRegId.isEmpty()) {
                 registerInBackground(this);
             }
         
@@ -108,12 +104,18 @@ public class MainActivity extends Activity {
 		case R.id.button4:
 			intent = new Intent(this, RegistrationActivity.class);
 			break;
-			
+		case R.id.button5:
+			String clientRegistrationid = getRegistrationId(this);
+		    Toast.makeText(this, clientRegistrationid, Toast.LENGTH_SHORT).show();
+			Log.d(TAG, getRegistrationId(this));
+			break;
 		default:
 			Toast.makeText(this, "There is no such button", Toast.LENGTH_SHORT).show();
 			return;
 		}
-		startActivity(intent);
+		if (intent != null) {
+			startActivity(intent);
+		}
 		
 	}
     /**
@@ -215,14 +217,16 @@ public class MainActivity extends Activity {
                     if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(context);
                     }
-                    gcmRegId = gcm.register(SENDER_ID);
-                    msg = "Device registered, registration ID=" + gcmRegId;
+                    // It takes the server's id and registers using this id
+                    gcmClientRegId = gcm.register(GCM_SERVER_PROJECT_ID);
+                    msg = "Device registered, registration ID=" + gcmClientRegId;
                     
                     // Persist the regID - no need to register again.
-                    storeRegistrationId(context, gcmRegId);
+                    storeRegistrationId(context, gcmClientRegId);
 
-                    // Send the GCM registration id to server over HTTP,
-                    sendRegistrationIdToBackendServer(gcmRegId);
+                    //Defering the sending of registration ID to backend server
+                    //Once user completes account registration then application will 
+                    //send the GCM-client-registration-ID with other information.
     
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
