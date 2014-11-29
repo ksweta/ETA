@@ -5,10 +5,12 @@
     
     <EditText 
         android:id="@+id/et_registration_name"
+        android:inputType="textPersonName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hint_name" 
-        android:layout_marginTop="25dip" 
+        android:layout_marginTop="25dip"
+        android:imeOptions="actionNext" 
         />
     <EditText 
         android:id="@+id/et_registration_phone"
@@ -17,7 +19,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_registration_name"
         android:hint="@string/hint_phone" 
-        android:layout_marginTop="50dip" 
+        android:layout_marginTop="50dip"
+        android:imeOptions="actionNext" 
         />
     <EditText 
         android:id="@+id/et_registration_email"
@@ -27,18 +30,26 @@
         android:layout_below="@id/et_registration_phone"
         android:hint="@string/hint_email" 
         android:layout_marginTop="50dip" 
+        android:imeOptions="actionNext"
         />
-    
+    <EditText 
+        android:id="@+id/et_registration_password"
+        android:inputType="textPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/et_registration_email"
+        android:hint="@string/hint_password" 
+        android:layout_marginTop="50dip"
+        android:imeOptions="actionNext" 
+        />
      <Button 
         android:id="@+id/bt_register"
         android:onClick="registerUser"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/et_registration_email"
-        android:layout_centerInParent="true"
+        android:layout_below="@id/et_registration_password"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="50dip"
         android:text="@string/bt_register"  
         />
-    
-
 </RelativeLayout>
