@@ -1,5 +1,9 @@
 package com.eta;
 
+import com.eta.transport.ETANotificationRequest;
+import com.eta.transport.TransportService;
+import com.eta.transport.ETAServiceManager;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,6 +22,14 @@ public class SendETAActivity extends Activity{
 	 */
 	public void sendEta(View view){
 		Toast.makeText(this, "sending ETA notification", Toast.LENGTH_SHORT).show();
+		TransportService service = ETAServiceManager.getETAServerService();
+		ETANotificationRequest request = new ETANotificationRequest("5551112000",
+																	"Hi there",
+																	0.0,
+																	0.0,
+																	0.0,
+																	0.0);
+		//TODO: Send eta to server.
 	}
 }
 

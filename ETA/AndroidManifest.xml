@@ -15,11 +15,13 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/> 
+    
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <permission android:name="com.eta.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
     <uses-permission android:name="com.eta.permission.C2D_MESSAGE" />  
-       
+   <!-- Permission for Calendar -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
    
     <uses-feature
         android:glEsVersion="0x00020000"

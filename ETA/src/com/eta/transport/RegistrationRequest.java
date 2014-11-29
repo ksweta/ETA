@@ -1,16 +1,25 @@
-package com.eta.server;
-
+package com.eta.transport;
+/**
+ *  Server needs the following json format in RegistrationRequest.
+ * {"user": {"firstName":"kumari",
+ *  "lastName":"sweta",
+ *  "email":"ksweta@mail.sfsu.edu",
+ *  "phoneNumber":"5105555555",
+ *  "password":"madam0",
+ *  "clientRegistrationId": "Abcd"}
+ * }
+ *
+ */
 public class RegistrationRequest {
 	
 	protected User user;
 
 	public RegistrationRequest(User user) {
-		super();
 		this.user = user;
 	}
 	
 	public RegistrationRequest() {
-		super();
+		// for retrofit
 	}
 
 	public User getUser() {

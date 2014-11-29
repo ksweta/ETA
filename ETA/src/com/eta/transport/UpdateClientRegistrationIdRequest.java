@@ -1,11 +1,11 @@
-package com.eta.server;
+package com.eta.transport;
 
 public class UpdateClientRegistrationIdRequest {
 	protected String phoneNumber;
 	protected String clientRegistrationId;
 	
 	public UpdateClientRegistrationIdRequest() {
-		super();
+		
 	}
 	
 	public UpdateClientRegistrationIdRequest(String phoneNumber,

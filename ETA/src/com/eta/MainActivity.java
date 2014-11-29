@@ -2,6 +2,15 @@ package com.eta;
 
 import java.io.IOException;
 
+import retrofit.Callback;
+import retrofit.RequestInterceptor.RequestFacade;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+
+import com.eta.transport.RegistrationRequest;
+import com.eta.transport.TransportService;
+import com.eta.transport.User;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -109,6 +118,8 @@ public class MainActivity extends Activity {
 		    Toast.makeText(this, clientRegistrationid, Toast.LENGTH_SHORT).show();
 			Log.d(TAG, getRegistrationId(this));
 			break;
+		case R.id.button6:
+			serverController();
 		default:
 			Toast.makeText(this, "There is no such button", Toast.LENGTH_SHORT).show();
 			return;
@@ -118,6 +129,39 @@ public class MainActivity extends Activity {
 		}
 		
 	}
+    private void serverController() {
+    	
+    	RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
+    	adapterBuilder.setConverter(TransportService.DATA_CONVERTER)
+    				  .setEndpoint(TransportService.SERVICE_ENDPOINT)
+    				  .setLogLevel(RestAdapter.LogLevel.FULL)
+    				  .setLog(new ETARetrofitLog());
+    	
+    	TransportService service = adapterBuilder.build().create(TransportService.class);
+    	User user = new User ("Kumari Sweta",
+    						  "ksweta@gmail.com",
+    						  "5107611364",
+    						  "madam0",
+    						  "ABCD");
+    	
+    	service.registerUser(new RegistrationRequest(user),
+    						 TransportService.HEADER_CONTENT_TYPE,
+    						 TransportService.HEADER_ACCEPT,
+    						 new Callback<Void>() {
+
+								@Override
+								public void failure(RetrofitError error) {
+									Log.e(TAG, error.toString());	
+								}
+
+								@Override
+								public void success(Void voidreturn, Response response) {
+									Log.i(TAG, " STATUS : " + String.valueOf(response.getStatus()));
+								}
+    		
+    	});
+    }
+    
     /**
      * Check the device to make sure it has the Google Play Services APK. If
      * it doesn't, display a dialog that allows users to download the APK from
@@ -244,12 +288,6 @@ public class MainActivity extends Activity {
             }
         }.execute(null, null, null);
     }
-    /**
-    * Sends the registration ID to your server over HTTP
-    */
-   private void sendRegistrationIdToBackendServer(String gcmRegistrationId) {
-       //TODO: This method will send the GCM registration ID to backend server
-   }
    
    /**
     * Stores the registration ID and app versionCode in the application's
@@ -266,6 +304,14 @@ public class MainActivity extends Activity {
        editor.putString(PROPERTY_GCM_REG_ID, regId);
        editor.putInt(PROPERTY_APP_VERSION, appVersion);
        editor.commit();
+   }
+   
+   class ETARetrofitLog implements RestAdapter.Log {
+	   final String TAG = ETARetrofitLog.class.getSimpleName();
+	@Override
+	public void log(String msg) {
+		Log.d(TAG, msg);
+	}
    }
   }
 

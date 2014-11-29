@@ -1,6 +1,6 @@
-package com.eta.server;
+package com.eta.transport;
 
-public class ETANotificationRequest {
+public class ETANotificationRequest extends Request {
 
 	//Receiver phone number.
 	protected String phoneNumber;
@@ -17,7 +17,6 @@ public class ETANotificationRequest {
 	protected Double dstLatitude;
 	
 	public ETANotificationRequest() {
-		super();
 		//For retrofit
 	}
 	

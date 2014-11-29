@@ -1,4 +1,4 @@
-package com.eta.server;
+package com.eta.transport;
 
 /**
  * This class is used to send the registration information to server.
@@ -6,8 +6,7 @@ package com.eta.server;
  */
 public class User {
 	
-	protected String firstName;
-	protected String lastName;
+	protected String name;
 	protected String email;
 	protected String phoneNumber;
 	protected String password;
@@ -15,15 +14,13 @@ public class User {
 	protected String clientRegistrationId;
 	
 	
-	public User(String firstName, 
-			    String lastName, 
+	public User(String name, 
 			    String email,
 			    String phoneNumber, 
 			    String password, 
 			    String clientRegistrationId) {
 		
-		this.firstName = firstName;
-		this.lastName = lastName;
+		this.name = name;
 		this.email = email;
 		this.phoneNumber = phoneNumber;
 		this.password = password;
@@ -31,23 +28,15 @@ public class User {
 	}
 	
 	public User(){
-		//This is for GSON/Retrofit
+		//This is for Retrofit
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getName() {
+		return name;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setFirstName(String name) {
+		this.name = name;
 	}
 
 	public String getEmail() {
@@ -84,9 +73,8 @@ public class User {
 
 	@Override
 	public String toString() {
-		return "User [firstName=" + firstName + ", lastName=" + lastName
-				+ ", email=" + email + ", phoneNumber=" + phoneNumber
-				+ ", password=" + password + ", clientRegistrationId="
-				+ clientRegistrationId + "]";
+		return "User [name=" + name + ", email=" + email + ", phoneNumber="
+				+ phoneNumber + ", password=" + password
+				+ ", clientRegistrationId=" + clientRegistrationId + "]";
 	}
 }
