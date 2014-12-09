@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
 import android.content.IntentSender;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -27,12 +28,20 @@ import com.eta.util.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class ViewETAActivity extends Activity implements 
-GooglePlayServicesClient.ConnectionCallbacks,
-GooglePlayServicesClient.OnConnectionFailedListener {
+	GooglePlayServicesClient.ConnectionCallbacks,
+	GooglePlayServicesClient.OnConnectionFailedListener
+	{
 	// Global constants
 	private final static String TAG = ViewETAActivity.class.getSimpleName();
 	private final static String TAG_STATUS = "status";
@@ -57,7 +66,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
     private LocationClient locationClient;
     private boolean locationClientConnected;
     private Long totalTimeInSeconds;
-    private List<Location> route;
+    private List<LatLng> route;
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +120,10 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	public void onConnected(Bundle connectionHint) {
 		locationClientConnected = true;
 		Toast.makeText(this, "Location client is connected", Toast.LENGTH_SHORT).show();
+		Location currentLocation = locationClient.getLastLocation();
+		map.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(currentLocation.getLatitude(),
+				                                                       currentLocation.getLongitude()),
+				                                            20));
 	}
 	@Override
 	public void onDisconnected() {
@@ -146,17 +159,40 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			
 		}
 	}
-	
+	public void drawRoute() {
+		PolylineOptions polylineOptions = new PolylineOptions();
+		polylineOptions.addAll(route).width(5.0f).color(Color.RED);
+		map.addPolyline(polylineOptions);
+		
+		LatLngBounds.Builder builder = new LatLngBounds.Builder();
+		
+		for (LatLng latlng : route){
+			builder.include(latlng);
+		}
+		
+		map.animateCamera( CameraUpdateFactory
+				   .newLatLngBounds(builder.build(), 100));
+		MarkerOptions marker = new MarkerOptions();
+		marker.title("Sweta ETA: 12 mins")
+			  .snippet("Sweta will be 12 mins late")
+			  .position(route.get(0))
+			  .anchor(0.0f, 1.0f)
+			  .icon((BitmapDescriptorFactory.fromResource(R.drawable.location)));
+			
+		Marker m = map.addMarker(marker);
+		m.showInfoWindow();
+		
+	}
 	private void getRouteDetails(String url){
 	
-		new AsyncTask<String, Void, List<Location>>() {
+		new AsyncTask<String, Void, List<LatLng>>() {
 
 			@Override
-			protected List<Location> doInBackground(String... params) {
+			protected List<LatLng> doInBackground(String... params) {
 
 				HttpResponse response = null;
 				String responseText = null;
-				List<Location>  locationList= new ArrayList<Location>();
+				List<LatLng>  locationList= new ArrayList<LatLng>();
 				try {
 					Log.d(TAG, params[0]);
 		            HttpClient client = new DefaultHttpClient();
@@ -189,18 +225,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 						JSONObject end_loc = null;
 						for (int i = 0; i < steps.length(); i++) {
 							JSONObject start_loc = steps.getJSONObject(i).getJSONObject(TAG_START_LOCATION);
-							Location loc = new Location("");
-							loc.setLatitude(start_loc.getDouble(TAG_LAT));
-							loc.setLongitude(start_loc.getDouble(TAG_LNG));
 							end_loc = steps.getJSONObject(i).getJSONObject(TAG_END_LOCATION);
-							locationList.add(loc);
+							locationList.add(new LatLng(start_loc.getDouble(TAG_LAT), start_loc.getDouble(TAG_LNG)));
 						}
 						
 						if(end_loc != null) {
-							Location loc = new Location("");
-							loc.setLatitude(end_loc.getDouble(TAG_LAT));
-							loc.setLongitude(end_loc.getDouble(TAG_LNG));
-							locationList.add(loc);
+							locationList.add(new LatLng(end_loc.getDouble(TAG_LAT), end_loc.getDouble(TAG_LNG)));
 						}
 					}
 					
@@ -213,9 +243,10 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 			}
 			
 			@Override
-			protected void onPostExecute(List<Location> routeList){
+			protected void onPostExecute(List<LatLng> routeList){
 				route = routeList;
 				Toast.makeText(getApplicationContext(), "Total : " + route.size(), Toast.LENGTH_SHORT).show();
+				drawRoute();
 			}
 		}.execute(url);
 	}
@@ -234,5 +265,4 @@ GooglePlayServicesClient.OnConnectionFailedListener {
             return new String();
         }
     }
-	
 }
