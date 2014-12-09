@@ -4,13 +4,33 @@
     <string name="app_name">ETA</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <!-- Buttons -->
     <string name="bt_send_eta">Send ETA</string>
     <string name="bt_register">Register</string>
+    <string name="bt_add_contact">Add Contact</string>
+    <string name="bt_import_contact">Import Contact</string>
+    <string name="bt_get_location">Get Location</string>
+    
+    <!-- Text view -->
     <string name="tv_contact_name">contact name</string>
+    
+    <!-- Image view -->
     <string name="iv_contact_image_desc">ETA receiver contact image</string>
+    
+    <!-- Hints -->
     <string name="hint_name">Name</string>
     <string name="hint_email">Email</string>
     <string name="hint_phone">Phone</string>
     <string name="hint_password">Password</string>
-
+    <string name="hint_contact_name">Contact name</string>
+    <string name="hint_contact_phone">Contact phone</string>
+    
+    <!-- Misc. -->
+    <string name="no_contacts">No Contacts Found</string>
+    <string name="no_contact_selected">No Contact Selected</string>
+    <string name="name_placeholder">Some name</string>
+    <string name="phone_placeholder">Some phone number</string>
+    <!-- Latitude, longitude format -->
+    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
+    
 </resources>

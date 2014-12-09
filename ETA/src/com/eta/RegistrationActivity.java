@@ -104,9 +104,13 @@ public class RegistrationActivity extends Activity {
 
 			@Override
 			public void failure(RetrofitError error) {
+				
+				Response response = error.getResponse();
 				//TODO Need to put proper error handling.
-				Log.e(TAG, error.toString());
-
+				Toast.makeText(getApplicationContext(), 
+							   response.getReason(), 
+							   Toast.LENGTH_SHORT).show();
+				Log.e(TAG, error.getStackTrace().toString());
 			}
 
 			@Override
@@ -115,8 +119,7 @@ public class RegistrationActivity extends Activity {
 				Context context = getApplicationContext();
 				Toast.makeText(context,
 						       "Successfully registered", 
-						       Toast.LENGTH_SHORT)
-					 .show();
+						       Toast.LENGTH_SHORT).show();
 				
 				//Time to launch ContactListActivity
 				Intent intent = new Intent(context, ContactListActivity.class);

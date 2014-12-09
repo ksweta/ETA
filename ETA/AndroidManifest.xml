@@ -5,8 +5,10 @@
     android:versionName="1.0" >
 
     <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="19" />
+        android:minSdkVersion="12"
+        android:maxSdkVersion="21"
+        android:targetSdkVersion="19"
+         />
     
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -24,7 +26,9 @@
     <uses-permission android:name="com.eta.permission.C2D_MESSAGE" />  
    <!-- Permission for Calendar -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
-   
+   <!-- Permission for contact list -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true"/>
