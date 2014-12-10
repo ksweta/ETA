@@ -1,5 +1,7 @@
 package com.eta.data;
 
+import java.util.Date;
+
 public class ContactDetails {
 	private Long id;
 	private String name;
@@ -7,21 +9,26 @@ public class ContactDetails {
 	//'true' if the phone number is registered with ETA
 	// Otherwise 'false'
 	private Boolean registered;
-
-	public ContactDetails(){
-		//For system.
-	}
-
-	public ContactDetails(String name, String phone, Boolean registered) {
-		this(0L, name, phone, registered);
-	}
+	private Date syncDate;
 	
-	public ContactDetails(Long id, String name, String phone, Boolean registered) {
+	public ContactDetails() {
+		//Required by the system.
+	}
+	public ContactDetails(String name, 
+			              String phone,
+						  Boolean registered, 
+						  Date syncDate) {
+		//Passing ID as zero, this value will be ignored later.
+		this(0L, name, phone, registered, syncDate);
+	}
+	public ContactDetails(Long id, String name, String phone,
+			Boolean registered, Date syncDate) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.phone = phone;
 		this.registered = registered;
+		this.syncDate = syncDate;
 	}
 
 	public Long getId() {
@@ -56,9 +63,21 @@ public class ContactDetails {
 		this.registered = registered;
 	}
 
+	public boolean isRegistered() {
+		return this.registered;
+	}
+	public Date getSyncDate() {
+		return syncDate;
+	}
+
+	public void setSyncDate(Date syncDate) {
+		this.syncDate = syncDate;
+	}
+
 	@Override
 	public String toString() {
 		return "ContactDetails [id=" + id + ", name=" + name + ", phone="
-				+ phone + ", registered=" + registered + "]";
+				+ phone + ", registered=" + registered + ", syncDate="
+				+ syncDate + "]";
 	}
 }

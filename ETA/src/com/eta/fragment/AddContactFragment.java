@@ -1,5 +1,7 @@
 package com.eta.fragment;
 
+import java.util.Date;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,8 +14,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.eta.R;
-import com.eta.R.id;
-import com.eta.R.layout;
 import com.eta.data.ContactDetails;
 import com.eta.db.DBHelper;
 
@@ -45,7 +45,7 @@ public class AddContactFragment extends Fragment {
 				
 				//TODO Verify from ETA server that given contact is registered.
 				
-				ContactDetails contact = new ContactDetails(0L, name, phone, true);
+				ContactDetails contact = new ContactDetails(0L, name, phone, true, new Date());
 				DBHelper db = new DBHelper(activity);
 				if (!db.insertContact(contact)) {
 					Toast.makeText(activity, "Couldn't save contact details", Toast.LENGTH_SHORT).show();

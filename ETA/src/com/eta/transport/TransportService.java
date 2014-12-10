@@ -13,6 +13,7 @@ import retrofit.http.Query;
 
 public interface TransportService {
 	Converter DATA_CONVERTER = new GsonConverter(new Gson());
+	//TODO Need to put Heroku url.
 	String SERVICE_ENDPOINT = "http://10.0.0.10:3000";
 	String HEADER_CONTENT_TYPE = "application/json";
 	String HEADER_ACCEPT = "application/json";

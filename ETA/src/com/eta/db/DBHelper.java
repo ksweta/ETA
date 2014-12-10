@@ -1,13 +1,18 @@
 package com.eta.db;
 
-import com.eta.data.ContactDetails;
+import java.text.SimpleDateFormat;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Locale;
 
-import android.content.Context;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
+
+import com.eta.data.ContactDetails;
 
 /**
  * This a helper class which method to access SQLite database access.
@@ -21,19 +26,28 @@ public class DBHelper extends SQLiteOpenHelper {
 	public static final String COLUMN_NAME = "name";
 	public static final String COLUMN_PHONE = "phone"; 
 	public static final String COLUMN_REGISTERED = "registered";
-	
+	public static final String COLUMN_SYNC_DATE = "syncDate";
 	private static final String DATABASE_NAME = "contact_details.db";
 	private static final int DATABASE_VERSION = 1;
+
+	/**
+	 * SQLite stores the date as string format, so need SimpleDateFormat
+	 * to convert string to date object.
+	 */
+
+	private SimpleDateFormat simpleDateFormat;
 	
 	private static final String DATABASE_CREATE_CONTACT_TABLE = "CREATE TABLE "+ TABLE_CONTACTS + 
 			  "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 
 			  + COLUMN_NAME + " TEXT NOT NULL, "
 			  + COLUMN_PHONE + " TEXT NOT NULL, "
-			  + COLUMN_REGISTERED + " BOOL NOT NULL );";
+			  + COLUMN_REGISTERED + " BOOL NOT NULL,"
+			  + COLUMN_SYNC_DATE + " TEXT NOT NULL);";
 	
 	
 	public DBHelper(Context context) {
 		super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 	}
 	
 	@Override
@@ -59,22 +73,55 @@ public class DBHelper extends SQLiteOpenHelper {
 		return result > 0 ;
 	}
 	
-	public Cursor readAllContacts() {
+	public List<ContactDetails> readAllContacts() {
 		//Get almost all column from Contacts  table. 
 		String[] allColumns = new String[] {DBHelper.COLUMN_ID, 
-				                            DBHelper.COLUMN_NAME,
-				                            DBHelper.COLUMN_PHONE,
-				                            DBHelper.COLUMN_REGISTERED};
-		
+				DBHelper.COLUMN_NAME,
+				DBHelper.COLUMN_PHONE,
+				DBHelper.COLUMN_REGISTERED,
+				DBHelper.COLUMN_SYNC_DATE};
+
 		Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_CONTACTS,
-								  			        allColumns,
-								  			        null,
-								  			        null,
-								  			        null,
-								  			        null,
-								  			        null);
-		
-		return cursor;
+													allColumns,
+													null,
+													null,
+													null,
+													null,
+													null);
+		List<ContactDetails> contactList = new LinkedList<ContactDetails>();
+		if(cursor != null) {
+			cursor.moveToFirst();
+
+			// Get the index of the various columns. This helps to get 
+			// the column value from the cursor object.
+			int idColIndex = cursor.getColumnIndex(DBHelper.COLUMN_ID);
+			int nameColIndex = cursor.getColumnIndex(DBHelper.COLUMN_NAME);
+			int phoneColIndex = cursor.getColumnIndex(DBHelper.COLUMN_PHONE);
+			int registeredColIndex = cursor.getColumnIndex(DBHelper.COLUMN_REGISTERED);
+			int syncDateIndex = cursor.getColumnIndex(DBHelper.COLUMN_SYNC_DATE);
+
+			//Did other students make some good progress, was just like that.
+
+
+			while(cursor.moveToNext()) {
+				try {
+
+					ContactDetails contact = new ContactDetails(cursor.getLong(idColIndex),
+															    cursor.getString(nameColIndex),
+															    cursor.getString(phoneColIndex),
+															    cursor.getInt(registeredColIndex) == 1,
+															    simpleDateFormat.parse(cursor.getString(syncDateIndex)));
+					
+					//TODO Just for debugging, remove it after debugging.
+					Log.d(TAG, "Date from SQLite : " + cursor.getString(syncDateIndex));
+					contactList.add(contact);
+				} catch(Exception e) {
+					Log.e(TAG, e.getMessage(), e);
+				}
+			}
+			cursor.close();
+		}
+		return contactList;
 	}
 	
 	public int updateContact(ContactDetails contact) {
@@ -91,7 +138,32 @@ public class DBHelper extends SQLiteOpenHelper {
 					    			 new String[]{contact.getId().toString()});
 	}
 	
-	
+	/**
+	 * This method check if the given phone number is already present in the contact list.
+	 * @param phone Contact's phone number.
+	 * @return returns true if the phone number is already present in database.
+	 */
+	public boolean isContactPresent(String phone) {
+		String[] columns = new String[] {DBHelper.COLUMN_PHONE};
+		String[] selectionArgs = new String[]{phone};
+		
+		Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_CONTACTS, 
+													columns, 
+													DBHelper.COLUMN_PHONE + "=?", 
+													selectionArgs, 
+													null, 
+													null, 
+													null);
+		
+		if(cursor == null) {
+			Log.e(TAG, "isContactPresent(): Serious problem, cursor is null");
+		}
+		if (cursor.getCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 	/**
 	 * This is a helper method to convert ContactDetails object to ContentValues
 	 * This contentValues object will be used in various CRUD methods.
@@ -103,6 +175,7 @@ public class DBHelper extends SQLiteOpenHelper {
 		values.put(DBHelper.COLUMN_NAME, contact.getName());
 		values.put(DBHelper.COLUMN_PHONE, contact.getPhone());
 		values.put(DBHelper.COLUMN_REGISTERED, contact.getRegistered());
+		values.put(DBHelper.COLUMN_SYNC_DATE, simpleDateFormat.format(contact.getSyncDate()));
 		return values;
 	}
 }

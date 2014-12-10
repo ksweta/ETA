@@ -1,38 +1,44 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content" 
-    android:paddingLeft="10dp" 
-    android:paddingRight="10dp">
-    <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="0dp"
-        android:layout_weight=".70"
-        android:layout_height="match_parent"
-        >
-    <TextView android:id="@+id/contact_item_name"
-              android:layout_height="wrap_content"
-              android:layout_width="fill_parent"
-              android:textSize="17sp"
-              android:text="@string/name_placeholder"
-    		  android:padding="1dp" />
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    tools:context="${relativePackage}.${activityClass}">
+	<ImageView
+        android:id="@+id/iv_send"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/send" />
+
+    <ImageView
+        android:id="@+id/iv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toLeftOf="@id/iv_send"
+        android:layout_marginRight="10dp"
+        android:src="@drawable/green" />
     
-    <TextView android:id="@+id/contact_item_phone"
-              android:layout_height="wrap_content"
-              android:layout_width="fill_parent"
-              android:textSize="13sp"
-    		  android:padding="1dp"
-    		  android:text="@string/phone_placeholder"
-    		  android:textColor="@color/icsblue"/>     
-    </LinearLayout>
-    <Button android:id="@+id/contact_item_button"
-        	  android:layout_height="wrap_content"
-        	  android:layout_width="0dp"
-        	  android:layout_weight=".30"
-        	  android:text="@string/bt_send_eta" 
-        	  android:textSize="13sp"
-        	  style="?android:attr/borderlessButtonStyle"/>
-    
- </LinearLayout>
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/iv_status"
+        android:text="Contact Name"
+        android:textColor="#000"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/tv_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/tv_name"
+        android:text="555-111-2000"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="14sp" />
+</RelativeLayout>

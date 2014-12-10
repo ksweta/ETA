@@ -42,9 +42,9 @@ public class ContactListFragment extends ListFragment {
             // allows bindView() to retrieve stored references instead of calling findViewById for
             // each instance of the layout.
             final ViewHolder holder = new ViewHolder();
-            holder.tvName = (TextView) itemLayout.findViewById(R.id.contact_item_name);
-            holder.tvPhone = (TextView) itemLayout.findViewById(R.id.contact_item_phone);
-            holder.btSendEta = (Button) itemLayout.findViewById(R.id.contact_item_button);
+//            holder.tvName = (TextView) itemLayout.findViewById(R.id.contact_item_name);
+//            holder.tvPhone = (TextView) itemLayout.findViewById(R.id.contact_item_phone);
+//            holder.btSendEta = (Button) itemLayout.findViewById(R.id.contact_item_button);
 
             // Stores the resourceHolder instance in itemLayout. This makes resourceHolder
             // available to bindView and other methods that receive a handle to the item view.

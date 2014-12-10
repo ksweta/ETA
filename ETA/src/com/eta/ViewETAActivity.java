@@ -51,6 +51,7 @@ public class ViewETAActivity extends Activity implements
 	private final static String TAG_DURATION = "duration";
 	private final static String TAG_STEPS = "steps";
 	private final static String TAG_VALUE = "value";
+	private final static String TAG_TEXT = "text";
 	private final static String TAG_START_LOCATION = "start_location";
 	private final static String TAG_END_LOCATION = "end_location";
 	private final static String TAG_LAT = "lat";
@@ -60,12 +61,12 @@ public class ViewETAActivity extends Activity implements
      * Define a request code to send to Google Play services
      * This code is returned in Activity.onActivityResult
      */
+	
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	private GoogleMap map;
 	// Stores the current instantiation of the location client in this object
     private LocationClient locationClient;
     private boolean locationClientConnected;
-    private Long totalTimeInSeconds;
     private List<LatLng> route;
     
 	@Override
@@ -85,8 +86,10 @@ public class ViewETAActivity extends Activity implements
 		locationClient =  new LocationClient(this, this, this);
 		locationClientConnected = false;
 	}
+	
 	@Override
 	public void onConnectionFailed(ConnectionResult connectionResult) {
+		locationClientConnected = false;
 		 /*
          * Google Play services can resolve some errors it detects.
          * If the error has a resolution, try sending an Intent to
@@ -99,7 +102,6 @@ public class ViewETAActivity extends Activity implements
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this,
                         								  CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
                 /*
                 * Thrown if Google Play services canceled the original
                 * PendingIntent
@@ -130,6 +132,12 @@ public class ViewETAActivity extends Activity implements
 		locationClientConnected = false;
 		Toast.makeText(this, "Location client is disconnected", Toast.LENGTH_SHORT).show();
 	}
+	@Override
+	public void onStart() {
+		//Start the location client when start is called.
+		super.onStart();
+		locationClient.connect();
+	}
 	
 	@Override
 	public void onStop(){
@@ -138,17 +146,13 @@ public class ViewETAActivity extends Activity implements
 		super.onStop();
 	}
 	
-	public void onStart() {
-		//Start the location client when start is called.
-		super.onStart();
-		locationClient.connect();
-	}
 	
 	public void getLocation(View view){
 		if(locationClientConnected) {
 			Location currentLocation = locationClient.getLastLocation();
 			String latLong = getLatLng(this, currentLocation);
 			Toast.makeText(this, latLong, Toast.LENGTH_SHORT).show();
+			//Berkeley University
 			Double lat = 37.8723172D;
 			Double lon = -122.267056D;
 			String url = Utility.makeLocationUrl(lat, 
@@ -160,31 +164,36 @@ public class ViewETAActivity extends Activity implements
 		}
 	}
 	public void drawRoute() {
+		
 		PolylineOptions polylineOptions = new PolylineOptions();
 		polylineOptions.addAll(route).width(5.0f).color(Color.RED);
 		map.addPolyline(polylineOptions);
 		
 		LatLngBounds.Builder builder = new LatLngBounds.Builder();
 		
+		//Set the zoom to a level which can include the entire route.
 		for (LatLng latlng : route){
 			builder.include(latlng);
 		}
 		
 		map.animateCamera( CameraUpdateFactory
 				   .newLatLngBounds(builder.build(), 100));
-		MarkerOptions marker = new MarkerOptions();
-		marker.title("Sweta ETA: 12 mins")
+		
+		MarkerOptions markerOptions = new MarkerOptions();
+		markerOptions.title("Sweta ETA: 12 mins")
 			  .snippet("Sweta will be 12 mins late")
 			  .position(route.get(0))
-			  .anchor(0.0f, 1.0f)
-			  .icon((BitmapDescriptorFactory.fromResource(R.drawable.location)));
+			  .icon((BitmapDescriptorFactory.fromResource(R.drawable.eta_location)));
 			
-		Marker m = map.addMarker(marker);
+		Marker m = map.addMarker(markerOptions);
+		//This will display the information window without even clicking it.
 		m.showInfoWindow();
-		
 	}
+	
 	private void getRouteDetails(String url){
 	
+		//Created AsyncTask to get the route information from Google map server.
+		
 		new AsyncTask<String, Void, List<LatLng>>() {
 
 			@Override
@@ -216,35 +225,43 @@ public class ViewETAActivity extends Activity implements
 						Log.d(TAG, "Status is not OK, stat: "+status);
 					}
 					JSONArray legs = json.getJSONArray(TAG_ROUTES).getJSONObject(0).getJSONArray(TAG_LEGS);
+					
 					if (legs.length() > 0) {
 						
 						JSONObject legObject = legs.getJSONObject(0);
-						int duration = legObject.getJSONObject("duration").getInt("value");
+						
+						int duration = legObject.getJSONObject(TAG_DURATION).getInt(TAG_VALUE);
+						
 						Log.d(TAG, "Duration : "+duration);
+						
 						JSONArray steps = legObject.getJSONArray(TAG_STEPS);
+						
 						JSONObject end_loc = null;
+						
 						for (int i = 0; i < steps.length(); i++) {
 							JSONObject start_loc = steps.getJSONObject(i).getJSONObject(TAG_START_LOCATION);
 							end_loc = steps.getJSONObject(i).getJSONObject(TAG_END_LOCATION);
-							locationList.add(new LatLng(start_loc.getDouble(TAG_LAT), start_loc.getDouble(TAG_LNG)));
+							
+							locationList.add(new LatLng(start_loc.getDouble(TAG_LAT),
+									                    start_loc.getDouble(TAG_LNG)));
 						}
 						
 						if(end_loc != null) {
-							locationList.add(new LatLng(end_loc.getDouble(TAG_LAT), end_loc.getDouble(TAG_LNG)));
+							locationList.add(new LatLng(end_loc.getDouble(TAG_LAT), 
+									                    end_loc.getDouble(TAG_LNG)));
 						}
 					}
 					
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					Log.d(TAG, e.getMessage(), e);
 				}
 
 				return locationList;
 			}
 			
 			@Override
-			protected void onPostExecute(List<LatLng> routeList){
-				route = routeList;
+			protected void onPostExecute(List<LatLng> locationList){
+				route = locationList;
 				Toast.makeText(getApplicationContext(), "Total : " + route.size(), Toast.LENGTH_SHORT).show();
 				drawRoute();
 			}
