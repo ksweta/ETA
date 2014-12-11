@@ -153,16 +153,15 @@ public class SignupActivity extends Activity {
 				Log.i(TAG, " STATUS : " + String.valueOf(response.getStatus()));
 				Context context = getApplicationContext();
 				Toast.makeText(context,
-						       "Successfully registered", 
+						       "Successfully Signup", 
 						       Toast.LENGTH_SHORT).show();
+				//Treat successful signup as success sign in and save this information in 
+				//shared preferences.
+				ApplicationSharedPreferences.setSignedInFlag(context);
 				
 				//Time to launch ContactListActivity
-				Intent intent = new Intent(context, ContactListActivity.class);
-				startActivity(intent);
+				startActivity(new Intent(context, ContactListActivity.class));
 			}
-
 		});
 	}
-	
-	
 }

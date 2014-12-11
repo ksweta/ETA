@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.eta.db.DBHelper;
+import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 
 public class AddContactActivity extends Activity {
@@ -49,7 +50,7 @@ public class AddContactActivity extends Activity {
 			isError = true;
 		}
 		
-		if (phone.length() != Utility.PHONE_NUMBER_LENGTH) {
+		if (phone.length() != ApplicationConstants.PHONE_NUMBER_LENGTH) {
 			msg += "Phone number should be 10 digits long";
 			isError = true;
 		}

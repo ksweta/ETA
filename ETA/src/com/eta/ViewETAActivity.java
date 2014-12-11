@@ -14,7 +14,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.IntentSender;
 import android.graphics.Color;
 import android.location.Location;
@@ -24,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -101,7 +101,7 @@ public class ViewETAActivity extends Activity implements
 
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this,
-                        								  Utility.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                        								  ApplicationConstants.CONNECTION_FAILURE_RESOLUTION_REQUEST);
                 /*
                 * Thrown if Google Play services canceled the original
                 * PendingIntent

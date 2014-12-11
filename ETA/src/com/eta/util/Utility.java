@@ -15,10 +15,6 @@ import android.telephony.TelephonyManager;
  *
  */
 public class Utility {
-	//Global constants
-	public static final int PHONE_NUMBER_LENGTH = 10;
-	//Location related Global constants
-	public static final  int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 	 
 	public static String getDevicePhoneNumber(Context context) {
 		TelephonyManager tMgr = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -51,7 +47,7 @@ public class Utility {
 		String pattern = "[" + Pattern.quote(charToDel) + "]";
 		phone = phone.replaceAll(pattern, "");
 		//Remove international code if there is any, make sure it is only 10 digit long
-		phone = phone.substring(phone.length() - Utility.PHONE_NUMBER_LENGTH, phone.length());
+		phone = phone.substring(phone.length() - ApplicationConstants.PHONE_NUMBER_LENGTH, phone.length());
 		return phone;
 	}
 	

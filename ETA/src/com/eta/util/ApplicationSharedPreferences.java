@@ -71,4 +71,38 @@ public class ApplicationSharedPreferences {
 			throw new RuntimeException("Could not get package name: " + e);
 		}
 	}
+	
+	/**
+	 * This method sets signed-in flag 
+	 * @param context
+	 */
+	public static void setSignedInFlag(Context context) {
+		final SharedPreferences prefs = getSharedPreferences(context);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean(ApplicationConstants.PROPERTY_IS_SIGNED_IN, true);
+		editor.commit();
+	}
+	
+	/**
+	 * This method resets signed-in flag
+	 *  
+	 * @param context
+	 */
+	public static void resetSignedInFlag(Context context) {
+		final SharedPreferences prefs = getSharedPreferences(context);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean(ApplicationConstants.PROPERTY_IS_SIGNED_IN, false);
+		editor.commit();
+	}
+
+	/**
+	 * This method checks the status of signed-in flag stored in shared preferences.
+	 * This is used in MainActivity to determine the signed state of the application
+	 * @param context
+	 * @return
+	 */
+	public static boolean getSignedInFlag(Context context) {
+		final SharedPreferences prefs = getSharedPreferences(context);
+		return prefs.getBoolean(ApplicationConstants.PROPERTY_IS_SIGNED_IN, false);
+	}
 }

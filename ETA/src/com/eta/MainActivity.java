@@ -120,6 +120,10 @@ public class MainActivity extends Activity {
 		case R.id.button6:
 			serverController();
 			break;
+		case R.id.button7:
+			startActivity(new Intent(this, SignInActivity.class));
+			break;
+			
 		default:
 			Toast.makeText(this, "There is no such button", Toast.LENGTH_SHORT).show();
 			return;
@@ -138,6 +142,7 @@ public class MainActivity extends Activity {
 
 	}
 
+	
 	/**
 	 * Check the device to make sure it has the Google Play Services APK. If
 	 * it doesn't, display a dialog that allows users to download the APK from

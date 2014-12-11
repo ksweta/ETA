@@ -2,11 +2,12 @@
 <resources>
 
     <string name="app_name">ETA</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    
     <!-- Buttons -->
     <string name="bt_send_eta">Send ETA</string>
     <string name="bt_signup">Signup</string>
+    <string name="bt_signin">Signin</string>
     <string name="bt_cancel">Cancel</string>
     <string name="bt_add_contact">Add Contact</string>
     <string name="bt_import_contact">Import Contact</string>
@@ -14,6 +15,7 @@
     
     <!-- Text view -->
     <string name="tv_contact_name">contact name</string>
+    <string name="tv_signup">Signup</string>
     
     <!-- Image view -->
     <string name="iv_contact_image_desc">ETA receiver contact image</string>
@@ -32,6 +34,7 @@
     <string name="no_contact_selected">No Contact Selected</string>
     <string name="name_placeholder">Some name</string>
     <string name="phone_placeholder">Some phone number</string>
+    
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     

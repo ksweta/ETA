@@ -22,8 +22,11 @@ public interface TransportService {
 	String HEADER_CONTENT_TYPE_JSON = "application/json";
 	//Client expects json response.
 	String HEADER_ACCEPT_JSON = "application/json";
+	
 	//Status codes
 	int RESPONSE_STATUS_OK = 200;
+	int RESPONSE_UNAUTHORIZED = 401;
+	int RESPONSE_FORBIDDEN = 403;
 	
 	//Used for Sign up
 	@POST("/users.json")

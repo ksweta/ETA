@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.ContactsContract.Contacts;
@@ -28,8 +27,7 @@ import android.widget.Toast;
 
 import com.eta.data.ContactDetails;
 import com.eta.db.DBHelper;
-import com.eta.transport.TransportService;
-import com.eta.transport.TransportServiceFactory;
+import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
@@ -257,7 +255,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this,
-                        								  Utility.CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                        								  ApplicationConstants.CONNECTION_FAILURE_RESOLUTION_REQUEST);
                 /*
                 * Thrown if Google Play services canceled the original
                 * PendingIntent
