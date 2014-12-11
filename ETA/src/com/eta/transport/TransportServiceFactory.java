@@ -28,10 +28,11 @@ public class TransportServiceFactory {
 		if(service == null) {
 			//If service is not yet instantiated then instantiate it.
 			RestAdapter.Builder adapterBuilder = new RestAdapter.Builder();
-	    	adapterBuilder.setConverter(TransportService.DATA_CONVERTER)
-	    				  .setEndpoint(TransportService.SERVICE_ENDPOINT)
-	    				  .setLogLevel(RestAdapter.LogLevel.FULL)
-	    				  .setLog(new RetrofitLog());
+	    	adapterBuilder.setConverter(TransportService.DATA_CONVERTER) //Convert object to json and vice-versa
+	    				  .setEndpoint(TransportService.SERVICE_ENDPOINT) //Server url
+	    				  //TODO remove these lines once debugging is complete.
+	    				  .setLogLevel(RestAdapter.LogLevel.FULL) //Log level of Retrofit.
+	    				  .setLog(new RetrofitLog());  //Retrofit logger class for logging.
 	    	
 	       service = adapterBuilder.build().create(TransportService.class);
 		}

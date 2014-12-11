@@ -21,7 +21,7 @@ import com.eta.data.ContactDetails;
  */
 public class DBHelper extends SQLiteOpenHelper {
 	private static final String TAG = DBHelper.class.getSimpleName();
-	public static final String TABLE_CONTACTS = "contacts";
+	public static final String TABLE_NAME_CONTACTS = "contacts";
 	public static final String COLUMN_ID = "_id";
 	public static final String COLUMN_NAME = "name";
 	public static final String COLUMN_PHONE = "phone"; 
@@ -34,10 +34,9 @@ public class DBHelper extends SQLiteOpenHelper {
 	 * SQLite stores the date as string format, so need SimpleDateFormat
 	 * to convert string to date object.
 	 */
-
 	private SimpleDateFormat simpleDateFormat;
 	
-	private static final String DATABASE_CREATE_CONTACT_TABLE = "CREATE TABLE "+ TABLE_CONTACTS + 
+	private static final String DATABASE_CREATE_CONTACT_TABLE = "CREATE TABLE "+ TABLE_NAME_CONTACTS + 
 			  "(" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 
 			  + COLUMN_NAME + " TEXT NOT NULL, "
 			  + COLUMN_PHONE + " TEXT NOT NULL, "
@@ -60,28 +59,29 @@ public class DBHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		//TODO Dropping the table and recreating is not a good idea.
 		// need to write a better logic to handle DB upgrade.
-		db.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
+		db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME_CONTACTS);
 		onCreate(db);
 	}
 	
 	public boolean insertContact(ContactDetails contact) {
 		
-		long result = getWritableDatabase().insert(DBHelper.TABLE_CONTACTS, 
+		long result = getWritableDatabase().insert(DBHelper.TABLE_NAME_CONTACTS, 
 				                                   null, 
 				                                   getValues(contact));
+		
 		Log.d(TAG, "InsertData->result : " + result);
 		return result > 0 ;
 	}
 	
 	public List<ContactDetails> readAllContacts() {
-		//Get almost all column from Contacts  table. 
+		//Get all columns from Contacts  table. 
 		String[] allColumns = new String[] {DBHelper.COLUMN_ID, 
-				DBHelper.COLUMN_NAME,
-				DBHelper.COLUMN_PHONE,
-				DBHelper.COLUMN_REGISTERED,
-				DBHelper.COLUMN_SYNC_DATE};
+											DBHelper.COLUMN_NAME,
+											DBHelper.COLUMN_PHONE,
+											DBHelper.COLUMN_REGISTERED,
+											DBHelper.COLUMN_SYNC_DATE};
 
-		Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_CONTACTS,
+		Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_NAME_CONTACTS,
 													allColumns,
 													null,
 													null,
@@ -90,7 +90,7 @@ public class DBHelper extends SQLiteOpenHelper {
 													null);
 		List<ContactDetails> contactList = new LinkedList<ContactDetails>();
 		if(cursor != null) {
-			cursor.moveToFirst();
+			//cursor.moveToFirst();
 
 			// Get the index of the various columns. This helps to get 
 			// the column value from the cursor object.
@@ -100,10 +100,9 @@ public class DBHelper extends SQLiteOpenHelper {
 			int registeredColIndex = cursor.getColumnIndex(DBHelper.COLUMN_REGISTERED);
 			int syncDateIndex = cursor.getColumnIndex(DBHelper.COLUMN_SYNC_DATE);
 
-			//Did other students make some good progress, was just like that.
-
 
 			while(cursor.moveToNext()) {
+				//simpleDateFormat.parse() throws exception, necessary to have try-catch block here.
 				try {
 
 					ContactDetails contact = new ContactDetails(cursor.getLong(idColIndex),
@@ -112,20 +111,20 @@ public class DBHelper extends SQLiteOpenHelper {
 															    cursor.getInt(registeredColIndex) == 1,
 															    simpleDateFormat.parse(cursor.getString(syncDateIndex)));
 					
-					//TODO Just for debugging, remove it after debugging.
-					Log.d(TAG, "Date from SQLite : " + cursor.getString(syncDateIndex));
 					contactList.add(contact);
 				} catch(Exception e) {
 					Log.e(TAG, e.getMessage(), e);
 				}
 			}
+			
+			//Close the DB connection once work is done.
 			cursor.close();
 		}
 		return contactList;
 	}
 	
 	public int updateContact(ContactDetails contact) {
-		return getWritableDatabase().update(DBHelper.TABLE_CONTACTS, 
+		return getWritableDatabase().update(DBHelper.TABLE_NAME_CONTACTS, 
 							   				getValues(contact),
 							   				//Where clause
 							   				DBHelper.COLUMN_ID + "=?",
@@ -133,7 +132,7 @@ public class DBHelper extends SQLiteOpenHelper {
 	}
 	
 	public void deleteContact(ContactDetails contact){
-		getWritableDatabase().delete(DBHelper.TABLE_CONTACTS, 
+		getWritableDatabase().delete(DBHelper.TABLE_NAME_CONTACTS, 
 					    			 DBHelper.COLUMN_ID + "=?", 
 					    			 new String[]{contact.getId().toString()});
 	}
@@ -144,29 +143,37 @@ public class DBHelper extends SQLiteOpenHelper {
 	 * @return returns true if the phone number is already present in database.
 	 */
 	public boolean isContactPresent(String phone) {
-		String[] columns = new String[] {DBHelper.COLUMN_PHONE};
+		String[] columns = new String[] {DBHelper.COLUMN_ID};
 		String[] selectionArgs = new String[]{phone};
-		
-		Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_CONTACTS, 
-													columns, 
-													DBHelper.COLUMN_PHONE + "=?", 
-													selectionArgs, 
-													null, 
-													null, 
-													null);
-		
-		if(cursor == null) {
-			Log.e(TAG, "isContactPresent(): Serious problem, cursor is null");
-		}
-		if (cursor.getCount() > 0) {
-			return true;
-		} else {
-			return false;
+		Cursor cursor = null;
+		try {
+
+			cursor = getReadableDatabase().query(DBHelper.TABLE_NAME_CONTACTS, 
+												 columns, 
+												 DBHelper.COLUMN_PHONE + "=?", 
+												 selectionArgs, 
+												 null, 
+												 null, 
+												 null);
+
+			if(cursor == null) {
+				Log.e(TAG, "isContactPresent(): Serious problem, cursor is null");
+			}
+			if (cursor.getCount() > 0) {
+
+				return true;
+			} else {
+				return false;
+			}
+		} finally {
+			if(cursor != null) {
+				cursor.close();
+			}
 		}
 	}
 	/**
 	 * This is a helper method to convert ContactDetails object to ContentValues
-	 * This contentValues object will be used in various CRUD methods.
+	 * This contentValues object is used in various CRUD methods.
 	 * @param contact
 	 * @return
 	 */

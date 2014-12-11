@@ -62,7 +62,7 @@ public class ViewETAActivity extends Activity implements
      * This code is returned in Activity.onActivityResult
      */
 	
-    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
+   
 	private GoogleMap map;
 	// Stores the current instantiation of the location client in this object
     private LocationClient locationClient;
@@ -101,16 +101,14 @@ public class ViewETAActivity extends Activity implements
 
                 // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(this,
-                        								  CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                        								  Utility.CONNECTION_FAILURE_RESOLUTION_REQUEST);
                 /*
                 * Thrown if Google Play services canceled the original
                 * PendingIntent
                 */
 
             } catch (IntentSender.SendIntentException e) {
-
-                // Log the error
-                e.printStackTrace();
+            	Log.e(TAG, e.getMessage(), e);
             }
         } else {
 
@@ -150,7 +148,7 @@ public class ViewETAActivity extends Activity implements
 	public void getLocation(View view){
 		if(locationClientConnected) {
 			Location currentLocation = locationClient.getLastLocation();
-			String latLong = getLatLng(this, currentLocation);
+			String latLong = Utility.getLatLng(this, currentLocation);
 			Toast.makeText(this, latLong, Toast.LENGTH_SHORT).show();
 			//Berkeley University
 			Double lat = 37.8723172D;
@@ -268,18 +266,5 @@ public class ViewETAActivity extends Activity implements
 		}.execute(url);
 	}
 	
-	private String getLatLng(Context context, Location currentLocation) {
-        // If the location is valid
-        if (currentLocation != null) {
-
-            // Return the latitude and longitude as strings
-            return context.getString(
-                    R.string.latitude_longitude,
-                    currentLocation.getLatitude(),
-                    currentLocation.getLongitude());
-        } else {
-            // Otherwise, return the empty string
-            return new String();
-        }
-    }
+	
 }

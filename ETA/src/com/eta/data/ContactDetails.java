@@ -9,6 +9,7 @@ public class ContactDetails {
 	//'true' if the phone number is registered with ETA
 	// Otherwise 'false'
 	private Boolean registered;
+	//When this contact was last synced with ETA server.
 	private Date syncDate;
 	
 	public ContactDetails() {

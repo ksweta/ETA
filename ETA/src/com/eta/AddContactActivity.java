@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.EditText;
 
 import com.eta.db.DBHelper;
+import com.eta.util.Utility;
 
 public class AddContactActivity extends Activity {
 
@@ -26,16 +27,16 @@ public class AddContactActivity extends Activity {
 	 }
 	 
 	 public void onClick(View view){
-		 String msg = "Please proivde values for following field(s):\n";
+		 String msg = "Please fix the following problem(s):\n";
 		 String name = etContactName.getText().toString();
 		 String phone = etContactPhone.getText().toString();
 		 boolean isError = false;
 		 if(name == null || name.isEmpty()) {
-			 msg += "name\n";
+			 msg += "Name field is empty\n";
 			 isError = true;
 		 }
 		 if (phone == null || phone.isEmpty()) {
-			 msg += "phone\n";
+			 msg += "Phone field is empty\n";
 			 isError = true;
 		 }
 		 
@@ -44,10 +45,14 @@ public class AddContactActivity extends Activity {
 		if(db.isContactPresent(phone)) {
 			//Make sure the phone number is not already present
 			//in the contact list.
-			msg += "Duplicate phone number.\n";
+			msg += "Duplicate phone number\n";
 			isError = true;
 		}
 		
+		if (phone.length() != Utility.PHONE_NUMBER_LENGTH) {
+			msg += "Phone number should be 10 digits long";
+			isError = true;
+		}
 		if (isError) {
 			Builder alert = new AlertDialog.Builder(this);
 			alert.setTitle("Add Contact");

@@ -40,8 +40,6 @@ public class MainActivity extends Activity {
 	private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 	private final static String TAG = MainActivity.class.getSimpleName();
 
-
-
 	//server project ID 
 	String GCM_SERVER_PROJECT_ID = "177762432832";
 
@@ -112,7 +110,7 @@ public class MainActivity extends Activity {
 			break;
 
 		case R.id.button4:
-			intent = new Intent(this, RegistrationActivity.class);
+			intent = new Intent(this, SignupActivity.class);
 			break;
 		case R.id.button5:
 			String clientRegistrationid = ApplicationSharedPreferences.getGCMClientRegistrationId(this);
@@ -134,7 +132,9 @@ public class MainActivity extends Activity {
 	private void serverController() {
 
 		TransportService service = TransportServiceFactory.getTransportService();
-
+		service.isReceipientRegistered("5551112000", 
+				                       TransportService.HEADER_ACCEPT_JSON,
+				                       new RegisteredReceipietCallback(this));
 
 	}
 
@@ -212,5 +212,25 @@ public class MainActivity extends Activity {
 			}
 		}.execute(null, null, null);
 	} 
+	
+	class RegisteredReceipietCallback implements Callback<Void> {
+
+		private Context context;
+		public RegisteredReceipietCallback(Context c) {
+			context = c;
+		}
+		@Override
+		public void failure(RetrofitError arg0) {
+			
+		}
+
+		@Override
+		public void success(Void arg0, Response response) {
+			if (response.getStatus() == TransportService.RESPONSE_STATUS_OK) {
+				Toast.makeText(context, "Phone is registered", Toast.LENGTH_SHORT).show();
+			}
+		}
+		
+	}
 }
 

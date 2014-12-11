@@ -12,45 +12,63 @@ import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-public class RegistrationActivity extends Activity {
-	private final String TAG = RegistrationActivity.class.getSimpleName();
+public class SignupActivity extends Activity {
+	private final String TAG = SignupActivity.class.getSimpleName();
 	private EditText etName;
 	private EditText etEmail;
 	private EditText etPhone;
 	private EditText etPassword;
-
+	private EditText etConfirmPassword;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.register);
+		setContentView(R.layout.activity_signup);
 
-		etName = (EditText)findViewById(R.id.et_registration_name);
-		etEmail =  (EditText)findViewById(R.id.et_registration_email);
-		etPhone = (EditText)findViewById(R.id.et_registration_phone);
-		etPassword = (EditText)findViewById(R.id.et_registration_password);
+		etName = (EditText)findViewById(R.id.et_signup_name);
+		etEmail =  (EditText)findViewById(R.id.et_signup_email);
+		etPhone = (EditText)findViewById(R.id.et_signup_phone);
+		etPassword = (EditText)findViewById(R.id.et_signup_password);
+		etConfirmPassword = (EditText)findViewById(R.id.et_signup_confirm_password);
+		
 		String phoneNumber = Utility.getDevicePhoneNumber(this);
 		if (phoneNumber != null && !phoneNumber.isEmpty()) {
-			etPhone.setText(phoneNumber);
+			etPhone.setText(Utility.purgePhoneNumber(phoneNumber));
 		}
 	}
 
-	public void registerUser(View view){
+	public void onClick(View view) {
+		switch(view.getId()) {
+		case R.id.bt_signup:
+			signUpUser();
+			break;
+			
+		case R.id.bt_signup_cancel:
+			//finish activity.
+			finish();
+			break;
+			
+		default:
+			Log.e(TAG, "There is no such button");
+			break;
+		}
+	}
+	//onClick method for Signup button
+	public void signUpUser(){
 
 		String name = etName.getText().toString();
 		String email = etEmail.getText().toString();
 		String phone = etPhone.getText().toString();
 		String password = etPassword.getText().toString();
+		String confirmPassword = etConfirmPassword.getText().toString();
 		String msg = "Please proivde values for following field(s):\n";
 		boolean isError = false;
 		if(name.isEmpty()){
@@ -71,45 +89,62 @@ public class RegistrationActivity extends Activity {
 			msg += "password\n";
 			isError = true;
 		}
+		if (confirmPassword.isEmpty()) {
+			msg += "confirm password\n";
+			isError = true;
+		}
+		
 		if (isError) {
-			Builder alert = new AlertDialog.Builder(this);
-			alert.setTitle("Registration");
-			alert.setMessage(msg);
-			alert.setNegativeButton("OK", null);
-			alert.show();
+			Utility.showErrorMessageWithOKButton(this, "Signup", msg);
 			return;
 		}
 
+		//Check if password doesn't match.
+		if(!password.equals(confirmPassword)) {
+			Utility.showErrorMessageWithOKButton(this, 
+											     "Password", 
+											     "Passwords are not matching");
+			//Reset password fields
+			etPassword.setText("");
+			etConfirmPassword.setText("");
+			//Bring the focus.
+			etPassword.setFocusableInTouchMode(true);
+			etPassword.requestFocus();
+			return;
+		}
+		
 		String gcmRegistrationId = ApplicationSharedPreferences.getGCMClientRegistrationId(this);
 		//if GCM registration id is empty then don't proceed.
 		//There is something terribly wrong.
 		if (gcmRegistrationId.isEmpty()) {
-			Builder alert = new AlertDialog.Builder(this);
-			alert.setTitle("GCM Registration missing");
-			alert.setMessage("GCM Registration ID not found, Something gone terribly wrong, closing application.");
-			alert.setNegativeButton("OK", null);
-			alert.show();
+			Utility.showErrorMessageWithOKButton(this, 
+					                             "GCM Registration missing",
+					                             "GCM Registration ID not found, Something gone terribly wrong, closing application.");
 			finish();
 		}
-		User user = new User (name,
-				email,
-				phone,
-				password,
-				gcmRegistrationId);
+		
+		//Get the transport service to make post request to server.
 		TransportService service = TransportServiceFactory.getTransportService();
-		service.registerUser(new RegistrationRequest(user),
-				TransportService.HEADER_CONTENT_TYPE,
-				TransportService.HEADER_ACCEPT,
-				new Callback<Void>() {
+				
+		User user = new User (name,
+							  email,
+							  phone,
+							  password,
+							  gcmRegistrationId);
+		
+		service.signUp(new RegistrationRequest(user),
+					   TransportService.HEADER_CONTENT_TYPE_JSON,
+				       TransportService.HEADER_ACCEPT_JSON,
+				       new Callback<Void>() {
 
 			@Override
 			public void failure(RetrofitError error) {
 				
 				Response response = error.getResponse();
-				//TODO Need to put proper error handling.
-				Toast.makeText(getApplicationContext(), 
-							   response.getReason(), 
-							   Toast.LENGTH_SHORT).show();
+				Utility.showErrorMessageWithOKButton(getApplicationContext(), 
+						                             "Signup error", 
+						                             "Server returned error during Singup");
+				Log.i(TAG, response.getReason());
 				Log.e(TAG, error.getStackTrace().toString());
 			}
 
@@ -128,4 +163,6 @@ public class RegistrationActivity extends Activity {
 
 		});
 	}
+	
+	
 }
