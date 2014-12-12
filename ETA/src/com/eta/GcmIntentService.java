@@ -72,8 +72,8 @@ public class GcmIntentService extends IntentService {
       String senderPhone = bundle.getString(GCM_MSG_SENDER_PHONE_NUMBER);
       Double srcLatitude = Double.valueOf(bundle.getString(GCM_MSG_SRC_LATITUDE));
       Double srcLongitude = Double.valueOf(bundle.getString(GCM_MSG_SRC_LONGITUDE));
-      Double dstLatitude = bundle.getDouble(GCM_MSG_DST_LATITUDE, 0.0D);
-      Double dstLongitude = bundle.getDouble(GCM_MSG_DST_LONGITUDE, 0.0D);
+      Double dstLatitude = Double.valueOf(bundle.getString(GCM_MSG_DST_LATITUDE, "0.0D"));
+      Double dstLongitude = Double.valueOf(bundle.getString(GCM_MSG_DST_LONGITUDE, "0.0D"));
       Integer eta = Integer.valueOf(bundle.getString(GCM_MSG_ETA));
       String bigText = senderName + " sent you an ETA ";
       

@@ -151,8 +151,12 @@ GooglePlayServicesClient.OnConnectionFailedListener
          String latLong = Utility.getLatLng(this, currentLocation);
          Toast.makeText(this, latLong, Toast.LENGTH_SHORT).show();
          //Berkeley University
-         Double lat = 37.8723172D;
-         Double lon = -122.267056D;
+         //Double lat = 37.8723172D;
+         //Double lon = -122.267056D;
+         //SFSU University
+         Double lat = 37.7231022D;
+         Double lon = -122.4760709D;
+         
          String url = Utility.makeLocationUrl(lat, 
                lon, 
                currentLocation.getLatitude(), 
