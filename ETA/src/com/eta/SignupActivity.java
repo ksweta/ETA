@@ -13,7 +13,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.eta.transport.RegistrationRequest;
+import com.eta.transport.SignupRequest;
 import com.eta.transport.TransportService;
 import com.eta.transport.TransportServiceFactory;
 import com.eta.transport.User;
@@ -150,7 +150,7 @@ public class SignupActivity extends Activity {
 							  password,
 							  gcmRegistrationId);
 		
-		service.signUp(new RegistrationRequest(user),
+		service.signUp(new SignupRequest(user),
 					   TransportService.HEADER_CONTENT_TYPE_JSON,
 				       TransportService.HEADER_ACCEPT_JSON,
 				       new Callback<Void>() {

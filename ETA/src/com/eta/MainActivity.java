@@ -8,7 +8,7 @@ import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 
-import com.eta.transport.RegistrationRequest;
+import com.eta.transport.SignupRequest;
 import com.eta.transport.TransportService;
 import com.eta.transport.TransportServiceFactory;
 import com.eta.transport.User;
