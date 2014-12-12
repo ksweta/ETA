@@ -16,7 +16,7 @@ public class ApplicationSharedPreferences {
 
 	public static SharedPreferences getSharedPreferences(Context context){
 		return context.getSharedPreferences(ApplicationConstants.SHARED_PREFERENCE_FILE,
-				Context.MODE_PRIVATE);
+											Context.MODE_PRIVATE);
 	}
 	/**
 	 * This method stores the GCM client registration id in shared preferences.
@@ -71,16 +71,36 @@ public class ApplicationSharedPreferences {
 			throw new RuntimeException("Could not get package name: " + e);
 		}
 	}
+	/**
+	 * This is a helper method which sets boolean shared preference to given value.
+	 * @param context Context of the application.
+	 * @param preferenceName Property name.
+	 * @param bool Desired boolean value.
+	 */
+	private static void setBooleanSharedPreference(Context context, String preferenceName, boolean bool) {
+		final SharedPreferences prefs = getSharedPreferences(context);
+		SharedPreferences.Editor editor = prefs.edit();
+		editor.putBoolean(preferenceName, bool);
+		editor.commit();
+	}
+
+	/**
+	 * This is a helper method which reads the given preference name and returns the value. It returns false
+	 * as default value if it doesn't find the preference value.
+	 * @param context Context of the application.
+	 * @param preferenceName Shared preference name.
+	 * @return Returns the store preference value if it finds it otherwise it returns false.
+	 */
+	private static boolean getBooleanSharedPreference(Context context, String preferenceName){
+		return getSharedPreferences(context).getBoolean(preferenceName, false);
+	}
 	
 	/**
 	 * This method sets signed-in flag 
 	 * @param context
 	 */
 	public static void setSignedInFlag(Context context) {
-		final SharedPreferences prefs = getSharedPreferences(context);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putBoolean(ApplicationConstants.PROPERTY_IS_SIGNED_IN, true);
-		editor.commit();
+		setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_IS_SIGNED_IN, true);
 	}
 	
 	/**
@@ -89,10 +109,7 @@ public class ApplicationSharedPreferences {
 	 * @param context
 	 */
 	public static void resetSignedInFlag(Context context) {
-		final SharedPreferences prefs = getSharedPreferences(context);
-		SharedPreferences.Editor editor = prefs.edit();
-		editor.putBoolean(ApplicationConstants.PROPERTY_IS_SIGNED_IN, false);
-		editor.commit();
+		setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_IS_SIGNED_IN, false);
 	}
 
 	/**
@@ -102,7 +119,56 @@ public class ApplicationSharedPreferences {
 	 * @return
 	 */
 	public static boolean getSignedInFlag(Context context) {
-		final SharedPreferences prefs = getSharedPreferences(context);
-		return prefs.getBoolean(ApplicationConstants.PROPERTY_IS_SIGNED_IN, false);
+		return getBooleanSharedPreference(context, ApplicationConstants.PROPERTY_IS_SIGNED_IN);
+	}
+	
+	/**
+	 * This method set signin show password shared preference flag as true.
+	 * @param context
+	 */
+	public static void setSigninShowPasswordFlag(Context context) {
+		setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNIN_SHOW_PASSWORD, true);
+	}
+	
+	/**
+	 * This method set signin show password shared preference flag as false.
+	 * @param context
+	 */
+	public static void resetSigninShowPasswordFlag(Context context) {
+		setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNIN_SHOW_PASSWORD, false);
+	}
+	
+	/**
+	 * This method returns signin show password shared preference flag. It returns false if it doesn't find 
+	 * the save value.
+	 * @param context
+	 * @return
+	 */
+	public static boolean getSigninShowPasswordFlag(Context context) {
+		return getBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNIN_SHOW_PASSWORD);
+	}
+
+	/**
+	 * This method set signup show password shared preference flag as true.
+	 * @param context
+	 */
+	public static void setSignupShowPasswordFlag(Context context) {
+		setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNUP_SHOW_PASSWORD, true);
+	}
+	/**
+	 * This method set signup show password shared preference flag as false.
+	 * @param context
+	 */
+	public static void resetSignupShowPasswordFlag(Context context) {
+		setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNUP_SHOW_PASSWORD, false);
+	}
+	/**
+	 * This method returns signup show password shared preference flag. It returns false if it doesn't find 
+	 * the save value.
+	 * @param context
+	 * @return
+	 */
+	public static boolean getSignupShowPasswordFlag(Context context) {
+		return getBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNUP_SHOW_PASSWORD);
 	}
 }

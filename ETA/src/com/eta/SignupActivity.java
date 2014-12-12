@@ -3,6 +3,15 @@ package com.eta;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.eta.transport.RegistrationRequest;
 import com.eta.transport.TransportService;
@@ -11,15 +20,6 @@ import com.eta.transport.User;
 import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 
-import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.EditText;
-import android.widget.Toast;
-
 public class SignupActivity extends Activity {
 	private final String TAG = SignupActivity.class.getSimpleName();
 	private EditText etName;
@@ -27,6 +27,7 @@ public class SignupActivity extends Activity {
 	private EditText etPhone;
 	private EditText etPassword;
 	private EditText etConfirmPassword;
+	private CheckBox cbShowPassword;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +39,23 @@ public class SignupActivity extends Activity {
 		etPhone = (EditText)findViewById(R.id.et_signup_phone);
 		etPassword = (EditText)findViewById(R.id.et_signup_password);
 		etConfirmPassword = (EditText)findViewById(R.id.et_signup_confirm_password);
-		
+		cbShowPassword = (CheckBox)findViewById(R.id.cb_signup_show_password);
+
 		String phoneNumber = Utility.getDevicePhoneNumber(this);
 		if (phoneNumber != null && !phoneNumber.isEmpty()) {
 			etPhone.setText(Utility.purgePhoneNumber(phoneNumber));
+		}
+
+		//Check shared preference if show password is true then 
+		//set the show password check box. Otherwise 
+		if(ApplicationSharedPreferences.getSignupShowPasswordFlag(this)) {
+			cbShowPassword.setChecked(true);
+			Utility.disablePasswordTransformation(etPassword);
+			Utility.disablePasswordTransformation(etConfirmPassword);
+		} else {
+			cbShowPassword.setChecked(false);
+			Utility.enablePasswordTransformation(etPassword);
+			Utility.enablePasswordTransformation(etConfirmPassword);
 		}
 	}
 
@@ -54,6 +68,10 @@ public class SignupActivity extends Activity {
 		case R.id.bt_signup_cancel:
 			//finish activity.
 			finish();
+			break;
+			
+		case R.id.cb_signup_show_password:
+			showPassword();
 			break;
 			
 		default:
@@ -163,5 +181,25 @@ public class SignupActivity extends Activity {
 				startActivity(new Intent(context, ContactListActivity.class));
 			}
 		});
+	}
+	
+	private void showPassword() {
+		if (cbShowPassword.isChecked()) {
+			//Disable the transformation method to show password.
+			Utility.disablePasswordTransformation(etPassword);
+			Utility.disablePasswordTransformation(etConfirmPassword);
+			
+			//Save this preference.
+			ApplicationSharedPreferences.setSignupShowPasswordFlag(this);
+			Log.d(TAG, "Password transformation disabled");
+		} else {
+			//Enable the transformation method to hide password.
+			Utility.enablePasswordTransformation(etPassword);
+			Utility.enablePasswordTransformation(etConfirmPassword);
+			
+			//Save the preference
+			ApplicationSharedPreferences.resetSignupShowPasswordFlag(this);
+			Log.d(TAG, "Password transformation enabled");
+		}
 	}
 }

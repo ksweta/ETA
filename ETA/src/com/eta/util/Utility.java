@@ -2,13 +2,16 @@ package com.eta.util;
 
 import java.util.regex.Pattern;
 
-import com.eta.R;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.location.Location;
 import android.net.Uri;
 import android.telephony.TelephonyManager;
+import android.text.method.PasswordTransformationMethod;
+import android.widget.EditText;
+
+import com.eta.R;
 
 /**
  * This class provide helper utility methods.
@@ -77,5 +80,20 @@ public class Utility {
 		alert.setMessage(message);
 		alert.setNegativeButton("OK", null);
 		alert.show();
+	}
+	/**
+	 * This method disables password transformation method and shows password. 
+	 * @param passwordField
+	 */
+	public static void disablePasswordTransformation(EditText etPassword) {
+		etPassword.setTransformationMethod(null);
+	}
+	
+	/**
+	 * This method enable password transformation method and hides password.
+	 * @param etPassword
+	 */
+	public static void enablePasswordTransformation(EditText etPassword) {
+		etPassword.setTransformationMethod(new PasswordTransformationMethod());
 	}
 }

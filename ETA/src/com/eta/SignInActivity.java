@@ -7,8 +7,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.eta.transport.LoginRequest;
@@ -21,6 +23,7 @@ public class SignInActivity extends Activity {
 	private static final String TAG = SignInActivity.class.getSimpleName();
 	private EditText etPhone;
 	private EditText etPassword;
+	private CheckBox cbShowPassword;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -28,11 +31,28 @@ public class SignInActivity extends Activity {
 		setContentView(R.layout.activity_signin);
 		etPhone = (EditText)findViewById(R.id.et_signin_phone);
 		etPassword = (EditText)findViewById(R.id.et_signin_password);
-		etPhone.setText(Utility.purgePhoneNumber(Utility.getDevicePhoneNumber(this)));
+		cbShowPassword = (CheckBox)findViewById(R.id.cb_signin_show_password);
+		
+		//Auto-populate the phone field.
+		String phoneNumber = Utility.getDevicePhoneNumber(this);
+		if (phoneNumber != null && !phoneNumber.isEmpty()) {
+			etPhone.setText(Utility.purgePhoneNumber(phoneNumber));
+		}
 		
 		//Bring the focus to password field
 		etPassword.setFocusableInTouchMode(true);
 		etPassword.requestFocus();
+		
+		//Check shared preference if show password is true then 
+		//set the show password check box. Otherwise 
+		if(ApplicationSharedPreferences.getSigninShowPasswordFlag(this)) {
+			cbShowPassword.setChecked(true);
+			Utility.disablePasswordTransformation(etPassword);
+			
+		} else {
+			cbShowPassword.setChecked(false);
+			Utility.enablePasswordTransformation(etPassword);
+		}
 	}
 	
 	public void onClick(View view){
@@ -42,6 +62,9 @@ public class SignInActivity extends Activity {
 			break;
 		case R.id.tv_signup:
 			signupRedirect();
+			break;
+		case R.id.cb_signin_show_password:
+			showPassword();
 			break;
 		default:
 			Log.e(TAG, "There is no such button");
@@ -91,6 +114,24 @@ public class SignInActivity extends Activity {
 	private void signupRedirect() {
 		Intent intent = new Intent(this, SignupActivity.class);
 		startActivity(intent);
+	}
+	/**
+	 * This is a helper method which disables password inputType and make it normal.
+	 */
+	private void showPassword() {
+		if (cbShowPassword.isChecked()) {
+			//Disable the transformation method to show password.
+			Utility.disablePasswordTransformation(etPassword);
+			//Save this preference.
+			ApplicationSharedPreferences.setSigninShowPasswordFlag(this);
+			Log.d(TAG, "Disabled password transformation");
+		} else {
+			//Enable the transformation method to hide password.
+			Utility.enablePasswordTransformation(etPassword);
+			//Save the preference
+			ApplicationSharedPreferences.resetSigninShowPasswordFlag(this);
+			Log.d(TAG, "Enabled password transformation");
+		}
 	}
 	/**
 	 * This class implements Callback interface of Retrofit. It will be used while making 

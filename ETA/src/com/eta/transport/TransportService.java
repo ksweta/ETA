@@ -17,7 +17,7 @@ public interface TransportService {
 	
 	//TODO Need to put Heroku url.
 	//String SERVICE_ENDPOINT = "https://immense-brushlands-1440.herokuapp.com";
-	String SERVICE_ENDPOINT = "http://10.0.0.10:3000";
+	String SERVICE_ENDPOINT = "http://10.0.0.7:3000";
 	//Server expects json request.
 	String HEADER_CONTENT_TYPE_JSON = "application/json";
 	//Client expects json response.
@@ -54,17 +54,29 @@ public interface TransportService {
 			    @Header("Accept") 
 	            String accept,
 				Callback<Void> callback);
-	
-	@GET("/users/isReceipientRegistered")
-	void isReceipientRegistered(@Query("phoneNumber") 
-	                            String phoneNumber, 
+	/**
+	 * This method check if the given phone number is registered with ETA server or not.
+	 * It returns 200 status code if phone number is registered. Otherwise returns 404 
+	 * status code.
+	 * @param phoneNumber Phone number of recipient.
+	 * @param accept
+	 * @param callback
+	 */
+	@POST("/users/receipientRegistered.json")
+	void isReceipientRegistered(@Body
+	                            ReceipientRegisteredRequest request, 
+	                            @Header("Content-Type") 
+	            	            String contentType,
 								@Header("Accept") 
 	                            String accept,
 								Callback<Void> callback);
 	
 	@POST("/notification/sendETA.json")
-	void sendETA(@Body ETANotificationRequest request, 
-			     @Header("Content-Type") String contentType,
-		         @Header("Accept") String accept,
+	void sendETA(@Body 
+			     ETANotificationRequest request, 
+			     @Header("Content-Type") 
+	             String contentType,
+		         @Header("Accept") 
+				 String accept,
 			     Callback<ETANotificationResponse> callback);
 }

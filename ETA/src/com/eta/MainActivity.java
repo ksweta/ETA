@@ -136,9 +136,6 @@ public class MainActivity extends Activity {
 	private void serverController() {
 
 		TransportService service = TransportServiceFactory.getTransportService();
-		service.isReceipientRegistered("5551112000", 
-				                       TransportService.HEADER_ACCEPT_JSON,
-				                       new RegisteredReceipietCallback(this));
 
 	}
 

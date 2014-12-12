@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="@string/hint_name" 
-        android:layout_marginTop="30dip"
+        android:layout_marginTop="25dip"
         android:imeOptions="actionNext" 
         />
     <EditText 
@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_signup_name"
         android:hint="@string/hint_phone" 
-        android:layout_marginTop="35dip"
+        android:layout_marginTop="25dip"
         android:imeOptions="actionNext" 
         />
     <EditText 
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_signup_phone"
         android:hint="@string/hint_email" 
-        android:layout_marginTop="35dip" 
+        android:layout_marginTop="25dip" 
         android:imeOptions="actionNext"
         />
     <EditText 
@@ -39,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_signup_email"
         android:hint="@string/hint_password" 
-        android:layout_marginTop="35dip"
+        android:layout_marginTop="25dip"
         android:imeOptions="actionNext" 
         />
     <EditText 
@@ -49,15 +49,27 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/et_signup_password"
         android:hint="@string/hint_confirm_password" 
-        android:layout_marginTop="35dip"
+        android:layout_marginTop="25dip"
         android:imeOptions="actionNext" 
         />
+     <CheckBox
+        android:id="@+id/cb_signup_show_password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_below="@+id/et_signup_confirm_password"
+        android:onClick="onClick"
+        android:text="@string/cb_show_password"
+        android:textColor="#778899" />
     <LinearLayout 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/et_signup_confirm_password"
-        android:layout_marginTop="35dip"
+        android:layout_below="@id/cb_signup_show_password"
+        android:layout_marginTop="25dip"
         android:orientation="horizontal">
         <Button 
         android:id="@+id/bt_signup_cancel"

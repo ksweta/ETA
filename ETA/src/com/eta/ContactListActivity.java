@@ -3,6 +3,9 @@ package com.eta;
 import java.util.Date;
 import java.util.List;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -27,6 +30,9 @@ import android.widget.Toast;
 
 import com.eta.data.ContactDetails;
 import com.eta.db.DBHelper;
+import com.eta.transport.ReceipientRegisteredRequest;
+import com.eta.transport.TransportService;
+import com.eta.transport.TransportServiceFactory;
 import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 import com.google.android.gms.common.ConnectionResult;
@@ -98,7 +104,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 					break;
 					
 				case ADD_CONTACT_RESULT:
-					insertContact(intent.getExtras().getString(CONTACT_NAME),
+					syncContact(intent.getExtras().getString(CONTACT_NAME),
 							      intent.getExtras().getString(CONTACT_PHONE));	
 					break;
 				default:
@@ -148,7 +154,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 				return;
 			}
 			
-			insertContact(name, Utility.purgePhoneNumber(phone));
+			syncContact(name, Utility.purgePhoneNumber(phone));
 			
 		}
 	}
@@ -156,29 +162,21 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 	 * Helper method to insert ContactDetails object in db. 
 	 * @param contact
 	 */
-	private void insertContact(String name, String phone){
-		
-		//TODO Syncup with ETA-server
+	private void syncContact(String name, String phone){
 		
 		ContactDetails contact = new ContactDetails(name,
 													phone,
-													//TODO replace this with ETA-Server return value
 													false,
 													new Date());
-		if (db.insertContact(contact)) {
-			//If contact is added successfully then add it in the 
-			//contactList and notify the adapter.
-			
-			contactList.add(contact);
-			contactListAdapter.notifyDataSetChanged();
-			
-			//Notify user.
-			Toast.makeText(this, "Contact added successfully", Toast.LENGTH_SHORT).show();
-			Log.i(TAG, "Contact added successfully");
-		} else {
-			Toast.makeText(this, "Couldn't add contact", Toast.LENGTH_SHORT).show();
-			Log.e(TAG, "Couldn't add contact");
-		}
+		TransportService service = TransportServiceFactory.getTransportService();
+		service.isReceipientRegistered(new ReceipientRegisteredRequest(phone),
+									   TransportService.HEADER_CONTENT_TYPE_JSON,
+				                       TransportService.HEADER_ACCEPT_JSON,
+				                       new ContactSyncCallback(this, 
+				                    		                   db, 
+				                    		                   contactList, 
+				                    		                   contactListAdapter, 
+				                    		                   contact));
 	}
 	
 	
@@ -297,5 +295,61 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 		//Stop the location client when stop is called.
 		locationClient.disconnect();
 		super.onStop();
+	}
+	
+	private class ContactSyncCallback implements Callback<Void> {
+		private final Context context;
+		private final DBHelper db;
+		private final List<ContactDetails> contactList;
+		private final ContactListAdapter contactListAdapter;
+		private final ContactDetails contact;
+		
+		public ContactSyncCallback(Context c, 
+				                   DBHelper db, 
+				                   List<ContactDetails> contactList, 
+				                   ContactListAdapter contactListAdapter,
+				                   ContactDetails contact) {
+			this.context = c;
+			this.db = db;
+			this.contactList = contactList;
+			this.contactListAdapter = contactListAdapter;
+			this.contact = contact;
+		}
+		
+		@Override
+		public void failure(RetrofitError error) {
+			contact.setRegistered(false);
+			insertContact();
+		}
+
+		@Override
+		public void success(Void voidresult, Response response) {
+			
+			if(response.getStatus() == TransportService.RESPONSE_STATUS_OK) {
+				contact.setRegistered(true);
+				insertContact();
+			}
+			
+			Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
+		}
+		
+		private void insertContact() {
+			//Put the current time in the syncDate field.
+			contact.setSyncDate(new Date());
+			if (db.insertContact(contact)) {
+				//If contact is added successfully then add it in the 
+				//contactList and notify the adapter.
+				
+				contactList.add(contact);
+				contactListAdapter.notifyDataSetChanged();
+				
+				//Notify user.
+				Toast.makeText(context, "Contact added successfully", Toast.LENGTH_SHORT).show();
+				Log.i(TAG, "Contact added successfully");
+			} else {
+				Toast.makeText(context, "Couldn't add contact", Toast.LENGTH_SHORT).show();
+				Log.e(TAG, "Couldn't add contact");
+			}
+		}
 	}
 }
