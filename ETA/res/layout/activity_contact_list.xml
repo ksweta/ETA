@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" 
-    android:orientation="vertical">
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
 
     <ListView
         android:id="@+id/lv_contact_list"
-        android:name="com.eta.fragment.ContactListFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        />
-
+        android:layout_weight="1" />
     <LinearLayout
         android:id="@+id/ll_contact_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:layout_margin="2dp"
         android:orientation="horizontal"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp" >
+        android:background="#C7EBED"
+        >
 
         <Button
             android:id="@+id/bt_contact_list_add_contact"
@@ -28,8 +24,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
+            android:layout_margin="5dp"
             android:onClick="onClick"
-            android:text="@string/bt_add_contact" /> 
+            android:text="@string/bt_add_contact"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_style" />
 
         <Button
             android:id="@+id/bt_contact_list_import_contact"
@@ -37,7 +36,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
+            android:layout_margin="5dp"
             android:onClick="onClick"
-            android:text="@string/bt_import_contact" />
+            android:text="@string/bt_import_contact"
+            android:textColor="#FFFFFF"
+            android:background="@drawable/button_style" />
     </LinearLayout>
+
 </LinearLayout>

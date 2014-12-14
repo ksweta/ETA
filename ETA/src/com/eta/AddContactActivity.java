@@ -40,8 +40,6 @@ public class AddContactActivity extends Activity {
          isError = true;
       }
 
-
-
       if(db.isContactPresent(phone)) {
          //Make sure the phone number is not already present
          //in the contact list.

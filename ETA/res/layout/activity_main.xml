@@ -12,14 +12,13 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.eta.MainActivity" >
 
-        
     <Button
         android:id="@+id/button1"
         android:onClick="onClick"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center" 
-        android:text="contact list"   
+        android:text="contact list"
         />
     
     <Button

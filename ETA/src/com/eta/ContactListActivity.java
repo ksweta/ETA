@@ -45,11 +45,13 @@ import com.google.android.gms.location.LocationClient;
 public class ContactListActivity extends Activity  implements 
 GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener {
+   //Constants
    private static final String TAG = ContactListActivity.class.getSimpleName();
    private static final int CONTACT_PICKER_RESULT = 1503;
    private static final int ADD_CONTACT_RESULT = 1504;
    public static final String CONTACT_NAME = "CONTACT_NAME";
    public static final String CONTACT_PHONE = "CONTACT_PHONE";
+   
    private ListView lvContacts;
    private List<ContactDetails> contactList;
    private DBHelper db;
@@ -57,6 +59,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
 
    //Location related stuff
    private LocationClient locationClient;
+   // keep track of connection state of location client
    private boolean locationClientConnected;
 
    @Override
@@ -162,30 +165,33 @@ GooglePlayServicesClient.OnConnectionFailedListener {
       }
    }
    /**
-    * Helper method to insert ContactDetails object in db. 
+    * Helper method to sync the registration status of the contact and save in DB.
     * @param contact
     */
    private void syncContact(String name, String phone){
 
       ContactDetails contact = new ContactDetails(name,
-            phone,
-            false,
-            new Date());
+                                                  phone,
+                                                  false,
+                                                  new Date());
+      
       TransportService service = TransportServiceFactory.getTransportService();
+      
       service.isReceipientRegistered(new ReceipientRegisteredRequest(phone),
-            TransportService.HEADER_CONTENT_TYPE_JSON,
-            TransportService.HEADER_ACCEPT_JSON,
-            new ContactSyncCallback(this, 
-                  db, 
-                  contactList, 
-                  contactListAdapter, 
-                  contact));
+                                     TransportService.HEADER_CONTENT_TYPE_JSON,
+                                     TransportService.HEADER_ACCEPT_JSON,
+                                     new ContactSyncCallback(this, 
+                                                             db, 
+                                                             contactList, 
+                                                             contactListAdapter, 
+                                                             contact));
    }
 
 
    class ContactListAdapter extends BaseAdapter {
       Context context;
       LayoutInflater inflater;
+      // contact list item layout
       int layout;
 
       public ContactListAdapter(Context c, int l) {
@@ -193,22 +199,24 @@ GooglePlayServicesClient.OnConnectionFailedListener {
          inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
          layout = l;
       }
-
+      
+      @Override
       public int getCount() {
          return contactList.size();
       }
-
+      
+      @Override
       public String getItem(int position) {
          return contactList.get(position).getName();
       }
-
+      
+      @Override
       public long getItemId(int position) {
          return position;
       }
 
       @Override
-      public View getView(int position, View convertView, ViewGroup parent) {
-         final int pos = position;
+      public View getView(final int position, View convertView, ViewGroup parent) {
          if (convertView == null) {
             convertView = inflater.inflate(layout, parent, false);
          }
@@ -227,15 +235,15 @@ GooglePlayServicesClient.OnConnectionFailedListener {
          btn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
                String location = "";
-               Log.d(TAG, "Phone : " + contactList.get(pos).getPhone());
+               Log.d(TAG, "Phone : " + contactList.get(position).getPhone());
                if(locationClientConnected) {
-                  if (contactList.get(pos).isRegistered()) {
+                  if (contactList.get(position).isRegistered()) {
                      location = Utility.getLatLng(context, locationClient.getLastLocation());
                      Log.d(TAG,  "Location : " + location);
-                     sendETANotification(locationClient.getLastLocation(), contactList.get(pos).getPhone());
+                     sendETANotification(locationClient.getLastLocation(), contactList.get(position).getPhone());
                   } else {
                      Toast.makeText(context,
-                                    "Couldn't send ETA because receiver phone is not registered", 
+                                    "Couldn't send ETA because receiver's phone is not registered", 
                                     Toast.LENGTH_SHORT).show();
                   }
                } else {
@@ -256,6 +264,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
       private void sendETANotification(Location location, String receiverPhone) {
          TransportService service = TransportServiceFactory.getTransportService();
          String senderPhone = Utility.purgePhoneNumber(Utility.getDevicePhoneNumber(context));
+         //Get User name from shared preferences.
          String senderName = ApplicationSharedPreferences.getUserName(context);
          ETANotificationRequest request = new ETANotificationRequest(receiverPhone, 
                                                                      senderPhone,
@@ -293,10 +302,6 @@ GooglePlayServicesClient.OnConnectionFailedListener {
             // Start an Activity that tries to resolve the error
             connectionResult.startResolutionForResult(this,
                   ApplicationConstants.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            /*
-             * Thrown if Google Play services canceled the original
-             * PendingIntent
-             */
 
          } catch (IntentSender.SendIntentException e) {
             Log.e(TAG, e.getMessage(), e);
@@ -312,8 +317,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
    @Override
    public void onConnected(Bundle connectionHint) {
       locationClientConnected = true;
-      //TODO Remove it, once debugging is complete.
-      Toast.makeText(this, "Location service is connected", Toast.LENGTH_SHORT).show();
+      //Toast.makeText(this, "Location service is connected", Toast.LENGTH_SHORT).show();
    }
 
    @Override

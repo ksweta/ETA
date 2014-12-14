@@ -16,6 +16,10 @@
     <!-- CheckBox -->
     <string name="cb_show_password">Show password</string>
     
+    <!-- Description for various view item -->
+    <string name="iv_send_eta">Send ETA button</string>
+    <string name="iv_contact_status">ETA registration status of contact</string>
+    
     <!-- Text view -->
     <string name="tv_contact_name">contact name</string>
     <string name="tv_signup">Signup</string>
@@ -36,7 +40,7 @@
     <string name="no_contacts">No Contacts Found</string>
     <string name="no_contact_selected">No Contact Selected</string>
     <string name="name_placeholder">Some name</string>
-    <string name="phone_placeholder">Some phone number</string>
+    <string name="phone_placeholder">5551112000</string>
     
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>

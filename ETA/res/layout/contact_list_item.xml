@@ -6,19 +6,24 @@
     tools:context="${relativePackage}.${activityClass}">
 	<ImageView
         android:id="@+id/iv_send"
+        android:contentDescription="@string/iv_send_eta"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:src="@drawable/send" />
 
     <ImageView
         android:id="@+id/iv_status"
+        android:contentDescription="@string/iv_contact_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_toLeftOf="@id/iv_send"
+        android:layout_toStartOf="@id/iv_send"
         android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
         android:src="@drawable/green" />
     
     <TextView
@@ -26,9 +31,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@id/iv_status"
-        android:text="Contact Name"
+        android:layout_toStartOf="@id/iv_status"
+        android:text="@string/name_placeholder"
         android:textColor="#000"
         android:textSize="18sp" />
 
@@ -37,8 +44,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
         android:layout_below="@id/tv_name"
-        android:text="555-111-2000"
+        android:text="@string/phone_placeholder"
         android:textColor="@android:color/darker_gray"
         android:textSize="14sp" />
 </RelativeLayout>

@@ -44,7 +44,8 @@
             android:layout_marginTop="10dp"
             android:text="@string/cb_show_password"
             android:textColor="#778899" 
-            android:onClick="onClick"/>
+            android:onClick="onClick"
+            />
 
         <Button
             android:id="@+id/bt_signin"
