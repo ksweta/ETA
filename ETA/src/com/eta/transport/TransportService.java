@@ -16,8 +16,9 @@ public interface TransportService {
    Converter DATA_CONVERTER = new GsonConverter(new Gson());
 
    //TODO Need to put Heroku url.
-   //String SERVICE_ENDPOINT = "https://immense-brushlands-1440.herokuapp.com";
-   String SERVICE_ENDPOINT = "http://10.0.0.7:3000";
+   String SERVICE_ENDPOINT = "https://immense-brushlands-1440.herokuapp.com";
+   //String SERVICE_ENDPOINT = "http://10.0.0.7:3000";
+   
    //Server expects json request.
    String HEADER_CONTENT_TYPE_JSON = "application/json";
    //Client expects json response.

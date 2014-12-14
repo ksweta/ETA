@@ -228,7 +228,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
          tvPhone.setText(contactList.get(position).getPhone());
 
          ImageView ivStatus = (ImageView) convertView.findViewById(R.id.iv_status);
-         ivStatus.setImageResource(contactList.get(position).isRegistered() ? R.drawable.green : R.drawable.red);
+         ivStatus.setImageResource(contactList.get(position).isRegistered() ? R.drawable.registered : R.drawable.not_registered);
 
          ImageView btn = (ImageView) convertView.findViewById(R.id.iv_send);
 

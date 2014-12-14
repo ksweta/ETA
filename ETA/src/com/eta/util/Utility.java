@@ -5,6 +5,9 @@ import java.util.regex.Pattern;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -112,23 +115,53 @@ public class Utility {
     * @param context
     * @return It returns true if network is connected otherwise false.
     */
-   public boolean isNetworkOnline(Context context) {
-      boolean status = false;
+   public static boolean isNetworkOnline(Context context) {
       try { 
-         ConnectivityManager cm = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-         //Try 
-         NetworkInfo netInfo = cm.getNetworkInfo(0);
-         if (netInfo != null && netInfo.getState()==NetworkInfo.State.CONNECTED) {
-             status= true;
-         }else {
-             netInfo = cm.getNetworkInfo(1);
-             if(netInfo!=null && netInfo.getState()==NetworkInfo.State.CONNECTED)
-                 status= true;
+         ConnectivityManager connMgr = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+         
+         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+         if (networkInfo != null && networkInfo.isConnected()) {
+            return true;
+         } else {
+            return false;
          }
       } catch (Exception e) {
          Log.e(TAG, e.getMessage(), e);
-         status = false;
+         return false;
       }
-      return status;
+   }
+   /**
+    * This is a helper method to provide "Network enable dialog". It shows two buttons, 
+    * "OK" and "Cancel". If user presses "OK", then app takes him to network settings, 
+    * where user can enable network. If user presses "Cancel" then app redirects user
+    * to Android Home screen.
+    * @param context
+    * @return
+    */
+   public static AlertDialog getNetworkOnlineAlert(final Context context) {
+      AlertDialog alert = new AlertDialog.Builder(context).create();
+      
+      alert.setTitle("Enable Network");
+      alert.setMessage("You network connection is not active. Please enable it");
+      alert.setIcon(R.drawable.network);
+      alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new OnClickListener() {
+         
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+            //If ok is clicked then open the wireless settings.
+            context.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+         }
+      });
+      alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+         
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+            //If Cancel button is chosen then to to main Activity.
+            Intent intent = new Intent(Intent.ACTION_MAIN); 
+            intent.addCategory(Intent.CATEGORY_HOME); 
+            context.startActivity(intent);
+         }
+      });
+      return alert;
    }
 }

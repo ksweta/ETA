@@ -62,7 +62,13 @@ public class SignupActivity extends Activity {
    public void onClick(View view) {
       switch(view.getId()) {
       case R.id.bt_signup:
-         signUpUser();
+         if(Utility.isNetworkOnline(this)) {
+            //If network is enable then let the user complete signup,
+            //otherwise show him the network enable alert dialog.
+            signUpUser();
+         } else {
+            Utility.getNetworkOnlineAlert(this).show();
+         }
          break;
 
       case R.id.bt_signup_cancel:
