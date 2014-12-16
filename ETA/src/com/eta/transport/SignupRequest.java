@@ -19,7 +19,7 @@ public class SignupRequest {
    }
 
    public SignupRequest() {
-      // for retrofit
+      // it is used by Gson
    }
 
    public User getUser() {

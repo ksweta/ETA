@@ -11,9 +11,11 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.database.Cursor;
+import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -34,17 +36,12 @@ import com.eta.db.DBHelper;
 import com.eta.transport.ETANotificationRequest;
 import com.eta.transport.ReceipientRegisteredRequest;
 import com.eta.transport.TransportService;
-import com.eta.transport.TransportServiceFactory;
-import com.eta.util.ApplicationConstants;
+import com.eta.transport.TransportServiceHelper;
 import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
-import com.google.android.gms.location.LocationClient;
 
 public class ContactListActivity extends Activity  implements 
-GooglePlayServicesClient.ConnectionCallbacks,
-GooglePlayServicesClient.OnConnectionFailedListener {
+LocationListener {
    //Constants
    private static final String TAG = ContactListActivity.class.getSimpleName();
    private static final int CONTACT_PICKER_RESULT = 1503;
@@ -56,25 +53,32 @@ GooglePlayServicesClient.OnConnectionFailedListener {
    private List<ContactDetails> contactList;
    private DBHelper db;
    private ContactListAdapter contactListAdapter;
-
-   //Location related stuff
-   private LocationClient locationClient;
-   // keep track of connection state of location client
-   private boolean locationClientConnected;
-
+   //This reference will get updated many places whenever
+   //application detects that the location has changed.
+   private Location currentLocation;
+   private LocationManager locationManager;
+   private String locationProvider;
+   
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_contact_list);
       lvContacts = (ListView)findViewById(R.id.lv_contact_list);
 
-      locationClient = new LocationClient(this, this, this);
-      locationClientConnected = false;
       db = new DBHelper(this);
       contactList = db.readAllContacts();
       contactListAdapter = new ContactListAdapter(this, R.layout.contact_list_item);
       lvContacts.setAdapter(contactListAdapter);
-
+       
+      //If GPS is disabled then show an alert to User.
+      if(!Utility.isGpsEnabled(this)){
+         Utility.getGpsDisableAlert(this).show();
+         return;
+      }
+      
+      //Get the location manager.
+      locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+      locationProvider = locationManager.getBestProvider(new Criteria(), true);
    }
 
    public void onClick(View view){
@@ -175,7 +179,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
                                                   false,
                                                   new Date());
       
-      TransportService service = TransportServiceFactory.getTransportService();
+      TransportService service = TransportServiceHelper.getTransportService();
       
       service.isReceipientRegistered(new ReceipientRegisteredRequest(phone),
                                      TransportService.HEADER_CONTENT_TYPE_JSON,
@@ -236,11 +240,12 @@ GooglePlayServicesClient.OnConnectionFailedListener {
             public void onClick(View v) {
                String location = "";
                Log.d(TAG, "Phone : " + contactList.get(position).getPhone());
-               if(locationClientConnected) {
+               if(isLocationAvailable()) {
                   if (contactList.get(position).isRegistered()) {
-                     location = Utility.getLatLng(context, locationClient.getLastLocation());
+                     location = Utility.getLatLng(context, locationManager.getLastKnownLocation(locationProvider));
                      Log.d(TAG,  "Location : " + location);
-                     sendETANotification(locationClient.getLastLocation(), contactList.get(position).getPhone());
+                     sendETANotification(locationManager.getLastKnownLocation(locationProvider), 
+                                          contactList.get(position).getPhone());
                   } else {
                      Toast.makeText(context,
                                     "Couldn't send ETA because receiver's phone is not registered", 
@@ -262,7 +267,7 @@ GooglePlayServicesClient.OnConnectionFailedListener {
        * @param location
        */
       private void sendETANotification(Location location, String receiverPhone) {
-         TransportService service = TransportServiceFactory.getTransportService();
+         TransportService service = TransportServiceHelper.getTransportService();
          String senderPhone = Utility.purgePhoneNumber(Utility.getDevicePhoneNumber(context));
          //Get User name from shared preferences.
          String senderName = ApplicationSharedPreferences.getUserName(context);
@@ -287,58 +292,8 @@ GooglePlayServicesClient.OnConnectionFailedListener {
    }
 
 
-   @Override
-   public void onConnectionFailed(ConnectionResult connectionResult) {
-      locationClientConnected = false;
-      /*
-       * Google Play services can resolve some errors it detects.
-       * If the error has a resolution, try sending an Intent to
-       * start a Google Play services activity that can resolve
-       * error.
-       */
-      if (connectionResult.hasResolution()) {
-         try {
+ 
 
-            // Start an Activity that tries to resolve the error
-            connectionResult.startResolutionForResult(this,
-                  ApplicationConstants.CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
-         } catch (IntentSender.SendIntentException e) {
-            Log.e(TAG, e.getMessage(), e);
-         }
-      } else {
-
-         // If no resolution is available, display a dialog to the user with the error.
-         Toast.makeText(this, "Location connection request failed", Toast.LENGTH_SHORT).show();
-      }
-
-   }
-
-   @Override
-   public void onConnected(Bundle connectionHint) {
-      locationClientConnected = true;
-      //Toast.makeText(this, "Location service is connected", Toast.LENGTH_SHORT).show();
-   }
-
-   @Override
-   public void onDisconnected() {
-      locationClientConnected = false;
-      Toast.makeText(this, "Location service disconnected", Toast.LENGTH_SHORT).show();
-   }
-
-   @Override
-   public void onStart() {
-      //Start the location client when start is called.
-      super.onStart();
-      locationClient.connect();
-   }
-
-   @Override
-   public void onStop(){
-      //Stop the location client when stop is called.
-      locationClient.disconnect();
-      super.onStop();
-   }
 
    private class ContactSyncCallback implements Callback<Void> {
       private final Context context;
@@ -421,5 +376,50 @@ GooglePlayServicesClient.OnConnectionFailedListener {
             
         Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
       }
+   }
+
+
+   private boolean isLocationAvailable(){
+      return currentLocation != null;
+   }
+   
+   @Override
+   public void onLocationChanged(Location location) {
+      currentLocation = location;
+   }
+
+   @Override
+   public void onStatusChanged(String provider, int status, Bundle extras) {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void onProviderEnabled(String provider) {
+      // TODO Auto-generated method stub
+      
+   }
+
+   @Override
+   public void onProviderDisabled(String provider) {
+      // TODO Auto-generated method stub
+      
+   }
+   
+   /* Request updates at startup */
+   @Override
+   protected void onResume() {
+     super.onResume();
+     locationManager.requestLocationUpdates(locationProvider, 
+                                            2000, //Minimum time between update in milliseconds
+                                            5, //Minimum distance in meters
+                                            this);
+   }
+
+   /* Remove the locationlistener updates when Activity is paused */
+   @Override
+   protected void onPause() {
+     super.onPause();
+     locationManager.removeUpdates(this);
    }
 }

@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.eta.transport.SignupRequest;
 import com.eta.transport.TransportService;
-import com.eta.transport.TransportServiceFactory;
+import com.eta.transport.TransportServiceHelper;
 import com.eta.transport.User;
 import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
@@ -148,7 +148,7 @@ public class SignupActivity extends Activity {
       }
 
       //Get the transport service to make post request to server.
-      TransportService service = TransportServiceFactory.getTransportService();
+      TransportService service = TransportServiceHelper.getTransportService();
 
       User user = new User (name,
             email,

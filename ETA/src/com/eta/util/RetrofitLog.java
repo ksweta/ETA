@@ -9,9 +9,9 @@ import android.util.Log;
  *
  */
 public class RetrofitLog implements RestAdapter.Log {
-	final String TAG = RetrofitLog.class.getSimpleName();
-	@Override
-	public void log(String msg) {
-		Log.d(TAG, msg);
-	}
+   final String TAG = RetrofitLog.class.getSimpleName();
+   @Override
+   public void log(String msg) {
+      Log.d(TAG, msg);
+   }
 }

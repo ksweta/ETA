@@ -15,9 +15,9 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 
 import com.eta.task.GcmRegistrationTask;
-import com.eta.transport.LoginRequest;
+import com.eta.transport.SignInRequest;
 import com.eta.transport.TransportService;
-import com.eta.transport.TransportServiceFactory;
+import com.eta.transport.TransportServiceHelper;
 import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 import com.google.android.gms.common.ConnectionResult;
@@ -134,8 +134,8 @@ public class SignInActivity extends Activity {
       }
 
       //Get the transport service to make post request to server.
-      TransportService service = TransportServiceFactory.getTransportService();
-      LoginRequest loginRequest = new LoginRequest(phone, password);
+      TransportService service = TransportServiceHelper.getTransportService();
+      SignInRequest loginRequest = new SignInRequest(phone, password);
       SignInCallback callback = new SignInCallback(this);
 
       //If sign-in is successful then redirecting to ContactListActivity in Callback class.
@@ -207,7 +207,7 @@ public class SignInActivity extends Activity {
     *
     */
    private class SignInCallback implements Callback<Void> {
-      Context context;
+      private Context context;
       public SignInCallback(Context c) {
          this.context = c;
       }

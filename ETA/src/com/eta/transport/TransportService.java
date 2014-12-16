@@ -6,10 +6,8 @@ import retrofit.Callback;
 import retrofit.converter.Converter;
 import retrofit.converter.GsonConverter;
 import retrofit.http.Body;
-import retrofit.http.GET;
 import retrofit.http.Header;
 import retrofit.http.POST;
-import retrofit.http.Query;
 
 public interface TransportService {
    //This will help to convert java object to json and vice-versa
@@ -50,7 +48,7 @@ public interface TransportService {
    
    @POST("/users/login.json")
    void signIn(@Body 
-               LoginRequest request,
+               SignInRequest request,
                @Header("Content-Type") 
                String contentType,
                @Header("Accept") 

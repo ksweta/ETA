@@ -14,7 +14,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.eta.transport.TransportService;
-import com.eta.transport.TransportServiceFactory;
+import com.eta.transport.TransportServiceHelper;
 import com.eta.util.ApplicationSharedPreferences;
 
 
@@ -58,7 +58,6 @@ public class MainActivity extends Activity {
 
 
       case R.id.button2:
-         intent = new Intent(this, SendETAActivity.class);
          break;
 
       case R.id.button3:
@@ -90,29 +89,7 @@ public class MainActivity extends Activity {
 
    }
    private void serverController() {
-
-      TransportService service = TransportServiceFactory.getTransportService();
-
+      //TransportService service = TransportServiceFactory.getTransportService();
    }
-
-   class RegisteredReceipietCallback implements Callback<Void> {
-
-      private Context context;
-      public RegisteredReceipietCallback(Context c) {
-         context = c;
-      }
-      @Override
-      public void failure(RetrofitError arg0) {
-
-      }
-
-      @Override
-      public void success(Void arg0, Response response) {
-         if (response.getStatus() == TransportService.RESPONSE_STATUS_OK) {
-            Toast.makeText(context, "Phone is registered", Toast.LENGTH_SHORT).show();
-         }
-      }
-   }
-
 }
 

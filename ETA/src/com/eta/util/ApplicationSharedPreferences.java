@@ -45,7 +45,7 @@ public class ApplicationSharedPreferences {
          Log.i(TAG, "Registration not found.");
          return "";
       }
-      // Check if app was updated; if so, it must clear the registration ID
+      // Check if app was updated; if so, it must remove the registration ID
       // since the existing regID is not guaranteed to work with the new
       // app version.
       int registeredVersion = prefs.getInt(ApplicationConstants.PROPERTY_APP_VERSION, 
@@ -59,7 +59,7 @@ public class ApplicationSharedPreferences {
    }
    /**
     * This method returns application version number.
-    * @return Application's version code from the {@code PackageManager}.
+    * @return Application's version code from the PackageManager.
     */
    public static int getAppVersion(Context context) {
       try {
@@ -96,7 +96,7 @@ public class ApplicationSharedPreferences {
    }
 
    /**
-    * This method sets signed-in flag 
+    * This method sets signed-in flag to true
     * @param context
     */
    public static void setSignedInFlag(Context context) {
@@ -104,7 +104,7 @@ public class ApplicationSharedPreferences {
    }
 
    /**
-    * This method resets signed-in flag
+    * This method resets signed-in flag to false
     *  
     * @param context
     */
@@ -131,7 +131,7 @@ public class ApplicationSharedPreferences {
    }
 
    /**
-    * This method set signin show password shared preference flag as false.
+    * This method sets signin show password shared preference flag as false.
     * @param context
     */
    public static void resetSigninShowPasswordFlag(Context context) {
@@ -149,14 +149,14 @@ public class ApplicationSharedPreferences {
    }
 
    /**
-    * This method set signup show password shared preference flag as true.
+    * This method sets signup show password shared preference flag as true.
     * @param context
     */
    public static void setSignupShowPasswordFlag(Context context) {
       setBooleanSharedPreference(context, ApplicationConstants.PROPERTY_SIGNUP_SHOW_PASSWORD, true);
    }
    /**
-    * This method set signup show password shared preference flag as false.
+    * This method sets signup show password shared preference flag as false.
     * @param context
     */
    public static void resetSignupShowPasswordFlag(Context context) {
@@ -177,6 +177,14 @@ public class ApplicationSharedPreferences {
       SharedPreferences.Editor editor = prefs.edit();
       editor.putString(ApplicationConstants.PROPERTY_USER_NAME, userName);
       editor.commit();
+   }
+   
+   /**
+    * This method reset the name to empty string
+    * @param context
+    */
+   public static void resetUserName(Context context){
+      setUserName(context, "");
    }
    
    public static String getUserName(Context context) {

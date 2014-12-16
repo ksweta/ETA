@@ -1,13 +1,17 @@
 package com.eta;
 
 
+import com.eta.util.ApplicationConstants;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
@@ -17,14 +21,7 @@ import android.widget.Toast;
 public class GcmIntentService extends IntentService {
    private static final String TAG = GcmIntentService.class.getSimpleName();
    private static final int NOTIFICATION_ID         = 1;
-   private static final String GCM_MSG_SENDER_PHONE_NUMBER = "GCM_MSG_SENDER_PHONE_NUMBER";
-   private static final String GCM_MSG_SENDER_NAME = "GCM_MSG_SENDER_NAME";
-   private static final String GCM_MSG_SRC_LONGITUDE = "GCM_MSG_SRC_LONGITUDE";
-   private static final String GCM_MSG_SRC_LATITUDE = "GCM_MSG_SRC_LATITUDE";
-   private static final String GCM_MSG_DST_LONGITUDE = "GCM_MSG_DST_LONGITUDE";
-   private static final String GCM_MSG_DST_LATITUDE = "GCM_MSG_DST_LATITUDE";
-   private static final String GCM_MSG_ETA = "GCM_MSG_ETA";
-
+   
    private NotificationManager mNotificationManager;
    private NotificationCompat.Builder builder;
 
@@ -68,13 +65,13 @@ public class GcmIntentService extends IntentService {
    //in bundle
 
    private void sendNotification(Bundle bundle) {
-      String senderName = bundle.getString(GCM_MSG_SENDER_NAME);
-      String senderPhone = bundle.getString(GCM_MSG_SENDER_PHONE_NUMBER);
-      Double srcLatitude = Double.valueOf(bundle.getString(GCM_MSG_SRC_LATITUDE));
-      Double srcLongitude = Double.valueOf(bundle.getString(GCM_MSG_SRC_LONGITUDE));
-      Double dstLatitude = Double.valueOf(bundle.getString(GCM_MSG_DST_LATITUDE, "0.0D"));
-      Double dstLongitude = Double.valueOf(bundle.getString(GCM_MSG_DST_LONGITUDE, "0.0D"));
-      Integer eta = Integer.valueOf(bundle.getString(GCM_MSG_ETA));
+      String senderName = bundle.getString(ApplicationConstants.GCM_MSG_SENDER_NAME);
+      String senderPhone = bundle.getString(ApplicationConstants.GCM_MSG_SENDER_PHONE_NUMBER);
+      Double srcLatitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_SRC_LATITUDE));
+      Double srcLongitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_SRC_LONGITUDE));
+      Double dstLatitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LATITUDE, "0.0D"));
+      Double dstLongitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LONGITUDE, "0.0D"));
+      Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA));
       String bigText = senderName + " sent you an ETA ";
       
       //TODO improve the message, make it more meaningful.
@@ -111,6 +108,9 @@ public class GcmIntentService extends IntentService {
 
       //Set the content intent. This intent will launch the ViewETAActicity
       mBuilder.setContentIntent(contentIntent);
+      // to add sound to the notification
+      Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+      mBuilder.setSound(alarmSound);
 
       //Time to show the notification.
       mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());

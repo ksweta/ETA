@@ -6,9 +6,10 @@ import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -26,6 +27,10 @@ import com.eta.R;
 public class Utility {
    //Constants
    private static final String TAG = Utility.class.getSimpleName();
+   private static final int SECOND = 1;
+   private static final int MINUTE = 60 * SECOND;
+   private static final int HOUR = 60 * MINUTE;
+   private static final int DAY = 24 * HOUR;
    
    /**
     * This method fetches phone number of the current device.
@@ -164,4 +169,73 @@ public class Utility {
       });
       return alert;
    }
+   /**
+    * This method checks if the GPS service provider is enable or not. It returns
+    * true if the GPS provider is enabled otherwise false.
+    * 
+    * @param context
+    * @return returns true if the GPS provider is enabled otherwise false.
+    */
+  public static boolean isGpsEnabled(Context context){
+     LocationManager service = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+     return service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+  }
+  /**
+   * This is a helper method to provide a alert message for GPS disabled. 
+   * This can be used to show an alert to user when GPS is disabled.
+   * The alert box has two buttons i.e OK and Cancel. If user presses
+   * OK then application will redirect user to GPS setting. If user 
+   * selects Cancel button then application doesn't do anything.  
+   * @param context
+   * @return
+   */
+  public static AlertDialog getGpsDisableAlert(final Context context) {
+     AlertDialog alert = new AlertDialog.Builder(context).create();
+     
+     alert.setTitle("GPS");
+     alert.setMessage("GPS provider is disabled. Please enable it");
+     alert.setIcon(R.drawable.gps);
+     alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new OnClickListener() {
+        
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+           //If ok is clicked then open the wireless settings.
+           context.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        }
+     });
+     alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+        
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+           //Don't do anything if cancel button is chosen.
+           Log.d(TAG, "GPS alert, cancel button is clicked");
+        }
+     });
+     return alert;
+  }
+  /**
+   * This is a helper method to convert given seconds to human readable time format.
+   * @param seconds
+   * @return
+   */
+  public static String convertSecondsToText(int seconds) {
+     StringBuffer text = new StringBuffer("");
+     if (seconds > DAY) {
+        text.append(seconds / DAY).append(" days ");
+        seconds %= DAY;
+     }
+     if (seconds > HOUR) {
+        text.append(seconds / HOUR).append(" hours ");
+        seconds %= HOUR;
+     }
+     if (seconds > MINUTE) {
+        text.append(seconds / MINUTE).append(" minutes ");
+        seconds %= MINUTE;
+     }
+     if (seconds > SECOND) {
+        text.append(seconds / SECOND).append(" seconds ");
+        seconds %= SECOND;
+     }
+     return text.toString();
+  }
 }
