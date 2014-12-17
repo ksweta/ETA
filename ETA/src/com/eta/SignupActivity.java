@@ -151,10 +151,10 @@ public class SignupActivity extends Activity {
       TransportService service = TransportServiceHelper.getTransportService();
 
       User user = new User (name,
-            email,
-            phone,
-            password,
-            gcmRegistrationId);
+                           email,
+                           phone,
+                           password,
+                           gcmRegistrationId);
 
       service.signUp(new SignupRequest(user),
             TransportService.HEADER_CONTENT_TYPE_JSON,

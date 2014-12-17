@@ -6,11 +6,17 @@ public class ContactDetails {
    //This id will be provided by the SQLite.
    //It is auto-increment.
    private Long id;
+   
+   //Recipient name.
    private String name;
+   
+   //Recipient Phone number.
    private String phone;
+   
    //'true' if the phone number is registered with ETA
    // Otherwise 'false'
    private Boolean registered;
+   
    //When this contact was last synced with ETA server.
    private Date syncDate;
 
@@ -24,8 +30,12 @@ public class ContactDetails {
       //Passing ID as zero, this value will be ignored later.
       this(0L, name, phone, registered, syncDate);
    }
-   public ContactDetails(Long id, String name, String phone,
-         Boolean registered, Date syncDate) {
+   
+   public ContactDetails(Long id, 
+                         String name, 
+                         String phone,
+                         Boolean registered, 
+                         Date syncDate) {
       super();
       this.id = id;
       this.name = name;

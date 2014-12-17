@@ -220,21 +220,20 @@ public class Utility {
    */
   public static String convertSecondsToText(int seconds) {
      StringBuffer text = new StringBuffer("");
-     if (seconds > DAY) {
+     if (seconds >= DAY) {
         text.append(seconds / DAY).append(" days ");
         seconds %= DAY;
      }
-     if (seconds > HOUR) {
+     if (seconds >= HOUR) {
         text.append(seconds / HOUR).append(" hours ");
         seconds %= HOUR;
      }
-     if (seconds > MINUTE) {
+     if (seconds >= MINUTE) {
         text.append(seconds / MINUTE).append(" minutes ");
         seconds %= MINUTE;
      }
-     if (seconds > SECOND) {
+     if (seconds >= SECOND) {
         text.append(seconds / SECOND).append(" seconds ");
-        seconds %= SECOND;
      }
      return text.toString();
   }

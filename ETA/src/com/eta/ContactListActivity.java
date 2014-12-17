@@ -73,7 +73,6 @@ LocationListener {
       //If GPS is disabled then show an alert to User.
       if(!Utility.isGpsEnabled(this)){
          Utility.getGpsDisableAlert(this).show();
-         return;
       }
       
       //Get the location manager.
@@ -390,20 +389,17 @@ LocationListener {
 
    @Override
    public void onStatusChanged(String provider, int status, Bundle extras) {
-      // TODO Auto-generated method stub
-      
+     Log.d(TAG, "Provider " + provider + " status changed to " + status);
    }
 
    @Override
    public void onProviderEnabled(String provider) {
-      // TODO Auto-generated method stub
-      
+      Log.d(TAG, "Provider " + provider + " is enabled");
    }
 
    @Override
    public void onProviderDisabled(String provider) {
-      // TODO Auto-generated method stub
-      
+     Log.d(TAG, "Provider " + provider + " is disabled");
    }
    
    /* Request updates at startup */
@@ -411,7 +407,7 @@ LocationListener {
    protected void onResume() {
      super.onResume();
      locationManager.requestLocationUpdates(locationProvider, 
-                                            2000, //Minimum time between update in milliseconds
+                                            1000, //Minimum time between update in milliseconds
                                             5, //Minimum distance in meters
                                             this);
    }

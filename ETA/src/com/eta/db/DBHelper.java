@@ -106,10 +106,10 @@ public class DBHelper extends SQLiteOpenHelper {
             try {
 
                ContactDetails contact = new ContactDetails(cursor.getLong(idColIndex),
-                     cursor.getString(nameColIndex),
-                     cursor.getString(phoneColIndex),
-                     cursor.getInt(registeredColIndex) == 1,
-                     simpleDateFormat.parse(cursor.getString(syncDateIndex)));
+                                                           cursor.getString(nameColIndex),
+                                                           cursor.getString(phoneColIndex),
+                                                           cursor.getInt(registeredColIndex) == 1,
+                                                           simpleDateFormat.parse(cursor.getString(syncDateIndex)));
 
                contactList.add(contact);
             } catch(Exception e) {

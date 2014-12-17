@@ -79,18 +79,16 @@ LocationListener
 
       // Accessing map fragment to configure it
       SupportMapFragment mapFragment =
-            (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-      mapFragment.getMapAsync( this);
+        (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+      mapFragment.getMapAsync(this);
 
       //If GPS is disabled then show an alert to User.
       if(!Utility.isGpsEnabled(this)){
          Utility.getGpsDisableAlert(this).show();
-         return;
       }
       //Get the location manager.
       locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
       locationProvider = locationManager.getBestProvider(new Criteria(), true);
-
    }
 
    public void drawRoute(EtaDetails etaDetails) {
@@ -142,9 +140,9 @@ LocationListener
             currentLocation = locationManager.getLastKnownLocation(locationProvider);
          }
          String url = Utility.makeLocationUrl(srcLatitude, 
-               srcLongitude, 
-               currentLocation.getLatitude(), 
-               currentLocation.getLongitude());
+                                               srcLongitude, 
+                                               currentLocation.getLatitude(), 
+                                               currentLocation.getLongitude());
 
          String latLong = Utility.getLatLng(this, currentLocation);
 
@@ -267,8 +265,7 @@ LocationListener
 
    @Override
    public void onStatusChanged(String provider, int status, Bundle extras) {
-      // TODO Auto-generated method stub
-
+      
    }
 
    @Override
