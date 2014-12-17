@@ -78,6 +78,8 @@ LocationListener {
       //Get the location manager.
       locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
       locationProvider = locationManager.getBestProvider(new Criteria(), true);
+      Log.d(TAG, "Location provider : " + locationProvider);
+      Toast.makeText(this, "LocationProvider : " + locationProvider, Toast.LENGTH_SHORT).show();
    }
 
    public void onClick(View view){
@@ -146,10 +148,7 @@ LocationListener {
          int nameColIndex = cursor.getColumnIndex(ContactsContract.Contacts.DISPLAY_NAME);
          cursor.moveToFirst();
          String phone = cursor.getString(phoneColIndex);
-         String name = "";
-         if (nameColIndex > -1){
-            name = cursor.getString(nameColIndex);
-         }
+         String name = cursor.getString(nameColIndex);
          //Some cleanup job
          cursor.close();
 
@@ -239,6 +238,10 @@ LocationListener {
             public void onClick(View v) {
                String location = "";
                Log.d(TAG, "Phone : " + contactList.get(position).getPhone());
+               if(!isLocationAvailable()) {
+                  currentLocation = locationManager.getLastKnownLocation(locationProvider);
+               }
+               Log.d(TAG, "Location : " + currentLocation);
                if(isLocationAvailable()) {
                   if (contactList.get(position).isRegistered()) {
                      location = Utility.getLatLng(context, locationManager.getLastKnownLocation(locationProvider));
@@ -385,6 +388,7 @@ LocationListener {
    @Override
    public void onLocationChanged(Location location) {
       currentLocation = location;
+      Log.d(TAG, "onLocationChanged : " + location.toString());
    }
 
    @Override
@@ -407,8 +411,8 @@ LocationListener {
    protected void onResume() {
      super.onResume();
      locationManager.requestLocationUpdates(locationProvider, 
-                                            1000, //Minimum time between update in milliseconds
-                                            5, //Minimum distance in meters
+                                            100, //Minimum time between update in milliseconds
+                                            1, //Minimum distance in meters
                                             this);
    }
 

@@ -132,9 +132,9 @@ LocationListener
          Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA, "0"));
 
          
-         Toast.makeText(this, 
-               "From GCM " + srcLatitude.toString() + ", " + srcLongitude.toString(), 
-               Toast.LENGTH_SHORT).show();
+//         Toast.makeText(this, 
+//               "From GCM " + srcLatitude.toString() + ", " + srcLongitude.toString(), 
+//               Toast.LENGTH_SHORT).show();
 
          if (!isLocationAvailable()) {
             currentLocation = locationManager.getLastKnownLocation(locationProvider);
@@ -144,13 +144,14 @@ LocationListener
                                                currentLocation.getLatitude(), 
                                                currentLocation.getLongitude());
 
-         String latLong = Utility.getLatLng(this, currentLocation);
-
-         Log.d(TAG, "lat long from Location manager : " + latLong);
+//         String latLong = Utility.getLatLng(this, currentLocation);
+//
+//         Log.d(TAG, "lat long from Location manager : " + latLong);
 
          final EtaDetails etaDetails = new EtaDetails();
          etaDetails.senderName = senderName;
          etaDetails.senderPhone = senderPhone;
+         // this url will be used by AsyncTask
          etaDetails.url = url;
          if(!eta.equals(0)) {
             //Eta is not provided 
@@ -173,17 +174,8 @@ LocationListener
                   HttpGet request = new HttpGet();
                   request.setURI(new URI(etaDetails.url));
                   response = client.execute(request);
-
-
-                  responseText = EntityUtils.toString(response.getEntity());
-               } catch (Exception e){
-                  Log.e(TAG, e.getMessage(), e);
-               }
-
-
-               Log.d(TAG, "Response text : " + responseText);
-
-               try {
+                  responseText = EntityUtils.toString(response.getEntity());// extracts body of response
+                  Log.d(TAG, "Response text : " + responseText);
                   JSONObject json = new JSONObject(responseText);
                   String  status = json.getString(TAG_STATUS);
                   if (!"OK".equals(status)) {
@@ -220,6 +212,8 @@ LocationListener
 
                } catch (JSONException e) {
                   Log.d(TAG, e.getMessage(), e);
+               } catch (Exception e) {
+                  Log.d(TAG, e.getMessage(), e);
                }
 
                return etaDetails;
@@ -227,7 +221,7 @@ LocationListener
 
             @Override
             protected void onPostExecute(EtaDetails etaDetails){
-               Toast.makeText(getApplicationContext(), "Total : " + etaDetails.route.size(), Toast.LENGTH_SHORT).show();
+               //Toast.makeText(getApplicationContext(), "Total : " + etaDetails.route.size(), Toast.LENGTH_SHORT).show();
                drawRoute(etaDetails);
             }
          }.execute(etaDetails);
@@ -239,8 +233,8 @@ LocationListener
    protected void onResume() {
       super.onResume();
       locationManager.requestLocationUpdates(locationProvider, 
-            2000, //Minimum time between update in milliseconds
-            5, //Minimum distance in meters
+            100, //Minimum time between update in milliseconds
+            1, //Minimum distance in meters
             this);
    }
 

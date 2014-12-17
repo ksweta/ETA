@@ -5,14 +5,17 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import com.eta.task.GcmRegistrationTask;
 import com.eta.transport.SignInRequest;
@@ -34,6 +37,7 @@ public class SignInActivity extends Activity {
    //Gcm related
    private GoogleCloudMessaging gcm;
    private String gcmClientRegId;
+   private ProgressDialog pd;
    
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +80,7 @@ public class SignInActivity extends Activity {
             new GcmRegistrationTask(this, gcm).execute(null,null);
          }
       }
+      
    }
 
    @Override
@@ -137,7 +142,13 @@ public class SignInActivity extends Activity {
       TransportService service = TransportServiceHelper.getTransportService();
       SignInRequest loginRequest = new SignInRequest(phone, password);
       SignInCallback callback = new SignInCallback(this);
-
+    
+      //Progress dialog
+      pd = new ProgressDialog(this);
+      pd.setCancelable(true);
+      pd.setIndeterminate(true);
+      pd.show();
+      
       //If sign-in is successful then redirecting to ContactListActivity in Callback class.
       service.signIn(loginRequest, 
             TransportService.HEADER_CONTENT_TYPE_JSON, 
@@ -225,6 +236,8 @@ public class SignInActivity extends Activity {
                   error.getMessage());
          }
          Log.e(TAG, error.getMessage(), error.getCause());
+         
+         pd.dismiss();
       }
 
       @Override
@@ -233,7 +246,8 @@ public class SignInActivity extends Activity {
             //If login is successful, do following
             // 1. Save this information in shared-preferences.
             ApplicationSharedPreferences.setSignedInFlag(context);
-
+           
+            pd.dismiss();
             // 2. Redirect to ContactList activity.
             context.startActivity(new Intent(context, ContactListActivity.class));
          }
