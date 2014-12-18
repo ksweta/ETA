@@ -95,7 +95,7 @@ public class GcmIntentService extends IntentService {
       PendingIntent contentIntent = PendingIntent.getActivity(this, 
                                                               iUniqueId,
                                                               viewETAIntent,
-                                                              0);
+                                                              PendingIntent.FLAG_UPDATE_CURRENT);
 
 
       //Prepare the notification

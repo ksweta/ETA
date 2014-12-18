@@ -317,7 +317,6 @@ OnItemClickListener
       }
    }
 
-
    private class ContactSyncCallback implements Callback<Void> {
       private final Context context;
       private final DBHelper db;

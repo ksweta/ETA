@@ -146,8 +146,7 @@ public class SignupActivity extends Activity {
          return;
       }
 
-      //Show progress dialog  now, we can dismiss it in Retrofit callback.
-      progressDialog.show();
+     
       
       String gcmRegistrationId = ApplicationSharedPreferences.getGCMClientRegistrationId(this);
       //if GCM registration id is empty then don't proceed.
@@ -159,6 +158,9 @@ public class SignupActivity extends Activity {
          finish();
       }
 
+      //Show progress dialog  now, we can dismiss it in Retrofit callback.
+      progressDialog.show();
+      
       //Get the transport service to make post request to server.
       TransportService service = TransportServiceHelper.getTransportService();
 

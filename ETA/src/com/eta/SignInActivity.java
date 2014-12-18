@@ -238,8 +238,9 @@ public class SignInActivity extends Activity {
                   error.getMessage());
          }
          Log.e(TAG, error.getMessage(), error.getCause());
-         
-         progressDialog.dismiss();
+         if(progressDialog.isShowing()) {
+            progressDialog.dismiss();
+         }
       }
 
       @Override
@@ -248,8 +249,9 @@ public class SignInActivity extends Activity {
             //If login is successful, do following
             // 1. Save this information in shared-preferences.
             ApplicationSharedPreferences.setSignedInFlag(context);
-           
-            progressDialog.dismiss();
+            if(progressDialog.isShowing()) {
+               progressDialog.dismiss();
+            }
             // 2. Redirect to ContactList activity.
             context.startActivity(new Intent(context, ContactListActivity.class));
          }
