@@ -84,11 +84,19 @@ public class GcmIntentService extends IntentService {
       // to show the sender on the map.
       Intent viewETAIntent = new Intent(this, ViewETAActivity.class);
       viewETAIntent.putExtras(bundle);
-
+      
+      int iUniqueId = 0;
+      //This logic will help to group the notification sent from same user(phone).
+      if (senderPhone.length() > 5) {
+         iUniqueId = Integer.valueOf(senderPhone.substring(senderPhone.length() - 5, senderPhone.length()));
+      } else {
+           iUniqueId = (int) (System.currentTimeMillis()  & 0xFFFFFF);
+      }
+      Log.d(TAG, "iUniqueId : " + iUniqueId);
       PendingIntent contentIntent = PendingIntent.getActivity(this, 
-                                                              0,
+                                                              iUniqueId,
                                                               viewETAIntent,
-                                                              PendingIntent.FLAG_UPDATE_CURRENT);
+                                                              0);
 
 
       //Prepare the notification
@@ -99,7 +107,8 @@ public class GcmIntentService extends IntentService {
                                                                   .bigText(bigText))
                                                                   .setContentText(contentText)
                                                                   .setAutoCancel(true)
-                                                                  .setOngoing(false);
+                                                                  .setOngoing(false)
+                                                                  .setGroup(ApplicationConstants.GCM_NOTIFICATION_GROUP_KEY);
 
       //Set the content intent. This intent will launch the ViewETAActicity
       mBuilder.setContentIntent(contentIntent);
@@ -108,6 +117,7 @@ public class GcmIntentService extends IntentService {
       mBuilder.setSound(alarmSound);
 
       //Time to show the notification.
-      mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+      mNotificationManager.notify(iUniqueId, mBuilder.build());
+      
    }
 }

@@ -20,6 +20,6 @@ public interface ApplicationConstants {
    String GCM_MSG_DST_LONGITUDE = "GCM_MSG_DST_LONGITUDE";
    String GCM_MSG_DST_LATITUDE = "GCM_MSG_DST_LATITUDE";
    String GCM_MSG_ETA = "GCM_MSG_ETA";
-
-   
+   //ETA notification
+   String GCM_NOTIFICATION_GROUP_KEY = "GCM_NOTIFICATION_GROUP_KEY";
 }
