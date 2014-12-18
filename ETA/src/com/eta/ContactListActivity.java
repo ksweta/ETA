@@ -10,7 +10,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.location.Criteria;
 import android.location.Location;
@@ -24,6 +26,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -41,7 +45,9 @@ import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 
 public class ContactListActivity extends Activity  implements 
-LocationListener {
+LocationListener,
+OnItemClickListener
+{
    //Constants
    private static final String TAG = ContactListActivity.class.getSimpleName();
    private static final int CONTACT_PICKER_RESULT = 1503;
@@ -79,7 +85,9 @@ LocationListener {
       locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
       locationProvider = locationManager.getBestProvider(new Criteria(), true);
       Log.d(TAG, "Location provider : " + locationProvider);
-      Toast.makeText(this, "LocationProvider : " + locationProvider, Toast.LENGTH_SHORT).show();
+      //Toast.makeText(this, "LocationProvider : " + locationProvider, Toast.LENGTH_SHORT).show();
+      
+      lvContacts.setOnItemClickListener(this);
    }
 
    public void onClick(View view){
@@ -336,10 +344,11 @@ LocationListener {
       private void insertContact() {
          //Put the current time in the syncDate field.
          contact.setSyncDate(new Date());
-         if (db.insertContact(contact)) {
+         long conId = db.insertContact(contact);
+         if (conId > 0) {
             //If contact is added successfully then add it in the 
             //contactList and notify the adapter.
-
+            contact.setId(conId);
             contactList.add(contact);
             contactListAdapter.notifyDataSetChanged();
 
@@ -421,5 +430,44 @@ LocationListener {
    protected void onPause() {
      super.onPause();
      locationManager.removeUpdates(this);
+   }
+   
+   
+   @Override
+   public void onItemClick(AdapterView<?> parent, 
+         View view,
+         int position, 
+         long id) {
+
+      final ContactDetails cd = contactList.get(position);
+      
+      
+      AlertDialog alert = new AlertDialog.Builder(this).create();
+      
+      alert.setTitle("Delete contact");
+      alert.setMessage("Do you really want to delete " + cd.getName() + "(" +cd.getPhone() +")?");
+ 
+      alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new OnClickListener() {
+         
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+            //If ok is clicked, delete the contact.
+            if(db.deleteContact(cd) != 0) {
+               contactList.remove(cd);
+               contactListAdapter.notifyDataSetChanged();
+               Toast.makeText(getApplicationContext(), "Contact deleted", Toast.LENGTH_SHORT).show();
+            } else {
+               Toast.makeText(getApplicationContext(), "Couldn't delete contact", Toast.LENGTH_SHORT).show();
+            }
+         }
+      });
+      alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+         
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+          //Do nothing.
+         }
+      });
+      alert.show();
    }
 }

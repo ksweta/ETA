@@ -63,23 +63,22 @@ public class DBHelper extends SQLiteOpenHelper {
       onCreate(db);
    }
 
-   public boolean insertContact(ContactDetails contact) {
+   public long insertContact(ContactDetails contact) {
 
       long result = getWritableDatabase().insert(DBHelper.TABLE_NAME_CONTACTS, 
-            null, 
-            getValues(contact));
-
+                                                 null, 
+                                                 getValues(contact));
       Log.d(TAG, "InsertData->result : " + result);
-      return result > 0 ;
+      return result ;
    }
 
    public List<ContactDetails> readAllContacts() {
       //Get all columns from Contacts  table. 
       String[] allColumns = new String[] {DBHelper.COLUMN_ID, 
-            DBHelper.COLUMN_NAME,
-            DBHelper.COLUMN_PHONE,
-            DBHelper.COLUMN_REGISTERED,
-            DBHelper.COLUMN_SYNC_DATE};
+                                          DBHelper.COLUMN_NAME,
+                                          DBHelper.COLUMN_PHONE,
+                                          DBHelper.COLUMN_REGISTERED,
+                                          DBHelper.COLUMN_SYNC_DATE};
 
       Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_NAME_CONTACTS,
             allColumns,
@@ -131,8 +130,8 @@ public class DBHelper extends SQLiteOpenHelper {
             new String[] {contact.getId().toString()});
    }
 
-   public void deleteContact(ContactDetails contact){
-      getWritableDatabase().delete(DBHelper.TABLE_NAME_CONTACTS, 
+   public int deleteContact(ContactDetails contact){
+      return getWritableDatabase().delete(DBHelper.TABLE_NAME_CONTACTS, 
             DBHelper.COLUMN_ID + "=?", 
             new String[]{contact.getId().toString()});
    }

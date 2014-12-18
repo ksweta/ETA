@@ -109,7 +109,7 @@ LocationListener
 
       MarkerOptions markerOptions = new MarkerOptions();
       markerOptions.title(etaDetails.senderName + "'s ETA ")
-      .snippet(etaDetails.senderName + " will be " +  etaDetails.eta + " late")
+      .snippet(etaDetails.senderName + " will arrive in " +  etaDetails.eta)
       .position(etaDetails.route.get(0))
       .icon((BitmapDescriptorFactory.fromResource(R.drawable.eta_location)));
 

@@ -4,7 +4,6 @@ package com.eta;
 import com.eta.util.ApplicationConstants;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,17 +12,14 @@ import android.content.Intent;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 public class GcmIntentService extends IntentService {
    private static final String TAG = GcmIntentService.class.getSimpleName();
    private static final int NOTIFICATION_ID         = 1;
    
    private NotificationManager mNotificationManager;
-   private NotificationCompat.Builder builder;
 
    public GcmIntentService() {
       super("GcmIntentService");
@@ -76,9 +72,8 @@ public class GcmIntentService extends IntentService {
       
       //TODO improve the message, make it more meaningful.
 
-      String contentText = String.format("%s's is running late. He will arrive in %d seconds", 
-                                         senderName, 
-                                         eta);
+      String contentText = String.format("%s is running late.", 
+                                         senderName);
 
       Log.d(TAG, " Content Text : " + contentText);
       mNotificationManager = (NotificationManager)
