@@ -42,6 +42,7 @@ import com.eta.transport.ETANotificationRequest;
 import com.eta.transport.ReceipientRegisteredRequest;
 import com.eta.transport.TransportService;
 import com.eta.transport.TransportServiceHelper;
+import com.eta.util.ApplicationConstants;
 import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 
@@ -151,6 +152,7 @@ OnItemClickListener
     * @param intent
     */
    private void importContact(Intent intent){
+      
       Uri uri = intent.getData();
       Log.d(TAG, "Contact URI : " + uri.toString());
 
@@ -169,6 +171,9 @@ OnItemClickListener
          //Some cleanup job
          cursor.close();
 
+         if (phone.length() >= ApplicationConstants.PHONE_NUMBER_LENGTH) {
+            phone = Utility.purgePhoneNumber(phone);
+         }
          //Make sure the phone number is not already in the contact list.
          if(db.isContactPresent(phone)) {
             Builder alert = new AlertDialog.Builder(this);
@@ -179,7 +184,7 @@ OnItemClickListener
             return;
          }
 
-         syncContact(name, Utility.purgePhoneNumber(phone));
+         syncContact(name, phone);
 
       }
    }
@@ -311,9 +316,6 @@ OnItemClickListener
                          new SendETACallback(context, receiverPhone));
       }
    }
-
-
- 
 
 
    private class ContactSyncCallback implements Callback<Void> {
