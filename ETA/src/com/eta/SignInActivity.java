@@ -33,11 +33,12 @@ public class SignInActivity extends Activity {
    private EditText etPhone;
    private EditText etPassword;
    private CheckBox cbShowPassword;
+   private ProgressDialog progressDialog;
    
    //Gcm related
    private GoogleCloudMessaging gcm;
    private String gcmClientRegId;
-   private ProgressDialog pd;
+  
    
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +48,11 @@ public class SignInActivity extends Activity {
       etPassword = (EditText)findViewById(R.id.et_signin_password);
       cbShowPassword = (CheckBox)findViewById(R.id.cb_signin_show_password);
 
+      //Setup Progress dialog for later use
+      progressDialog = new ProgressDialog(this);
+      progressDialog.setCancelable(true);
+      progressDialog.setIndeterminate(true);
+      
       //Auto-populate the phone field.
       String phoneNumber = Utility.getDevicePhoneNumber(this);
       if (phoneNumber != null && !phoneNumber.isEmpty()) {
@@ -80,7 +86,6 @@ public class SignInActivity extends Activity {
             new GcmRegistrationTask(this, gcm).execute(null,null);
          }
       }
-      
    }
 
    @Override
@@ -143,11 +148,8 @@ public class SignInActivity extends Activity {
       SignInRequest loginRequest = new SignInRequest(phone, password);
       SignInCallback callback = new SignInCallback(this);
     
-      //Progress dialog
-      pd = new ProgressDialog(this);
-      pd.setCancelable(true);
-      pd.setIndeterminate(true);
-      pd.show();
+     
+      progressDialog.show();
       
       //If sign-in is successful then redirecting to ContactListActivity in Callback class.
       service.signIn(loginRequest, 
@@ -237,7 +239,7 @@ public class SignInActivity extends Activity {
          }
          Log.e(TAG, error.getMessage(), error.getCause());
          
-         pd.dismiss();
+         progressDialog.dismiss();
       }
 
       @Override
@@ -247,7 +249,7 @@ public class SignInActivity extends Activity {
             // 1. Save this information in shared-preferences.
             ApplicationSharedPreferences.setSignedInFlag(context);
            
-            pd.dismiss();
+            progressDialog.dismiss();
             // 2. Redirect to ContactList activity.
             context.startActivity(new Intent(context, ContactListActivity.class));
          }

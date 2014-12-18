@@ -8,6 +8,7 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.app.AlertDialog.Builder;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -56,6 +57,9 @@ OnItemClickListener
    public static final String CONTACT_PHONE = "CONTACT_PHONE";
    
    private ListView lvContacts;
+   private View emptyView; 
+   private ProgressDialog progressDialog;
+   
    private List<ContactDetails> contactList;
    private DBHelper db;
    private ContactListAdapter contactListAdapter;
@@ -69,8 +73,13 @@ OnItemClickListener
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
       setContentView(R.layout.activity_contact_list);
+      emptyView  = findViewById(R.id.tv_no_contact);
       lvContacts = (ListView)findViewById(R.id.lv_contact_list);
-
+      //Setup Progress dialog for later use
+      progressDialog = new ProgressDialog(this);
+      progressDialog.setCancelable(true);
+      progressDialog.setIndeterminate(true);
+      
       db = new DBHelper(this);
       contactList = db.readAllContacts();
       contactListAdapter = new ContactListAdapter(this, R.layout.contact_list_item);
@@ -224,7 +233,7 @@ OnItemClickListener
       public long getItemId(int position) {
          return position;
       }
-
+      
       @Override
       public View getView(final int position, View convertView, ViewGroup parent) {
          if (convertView == null) {
@@ -277,6 +286,8 @@ OnItemClickListener
        * @param location
        */
       private void sendETANotification(Location location, String receiverPhone) {
+         //Show progress bar, and dismiss it in Retrofit callback methods.
+         progressDialog.show();
          TransportService service = TransportServiceHelper.getTransportService();
          String senderPhone = Utility.purgePhoneNumber(Utility.getDevicePhoneNumber(context));
          //Get User name from shared preferences.
@@ -376,6 +387,9 @@ OnItemClickListener
                         "Server error : " + error.getMessage(), 
                         Toast.LENGTH_SHORT).show();
          Log.e(TAG, error.getMessage(), error.getCause());
+         if(progressDialog.isShowing()) {
+            progressDialog.dismiss();
+         }
       }
 
       @Override
@@ -386,6 +400,9 @@ OnItemClickListener
          }
             
         Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
+        if(progressDialog.isShowing()) {
+           progressDialog.dismiss();
+        }
       }
    }
 
@@ -432,7 +449,14 @@ OnItemClickListener
      locationManager.removeUpdates(this);
    }
    
-   
+   @Override
+   public void onContentChanged() {
+      super.onContentChanged();
+      //For empty contact list.
+      lvContacts = (ListView)findViewById(R.id.lv_contact_list);
+      emptyView  = findViewById(R.id.tv_no_contact);
+      lvContacts.setEmptyView(emptyView);
+   }
    @Override
    public void onItemClick(AdapterView<?> parent, 
          View view,

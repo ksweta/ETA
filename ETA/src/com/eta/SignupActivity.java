@@ -4,6 +4,7 @@ import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,7 +29,8 @@ public class SignupActivity extends Activity {
    private EditText etPassword;
    private EditText etConfirmPassword;
    private CheckBox cbShowPassword;
-
+   private ProgressDialog progressDialog;
+   
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -41,6 +43,11 @@ public class SignupActivity extends Activity {
       etConfirmPassword = (EditText)findViewById(R.id.et_signup_confirm_password);
       cbShowPassword = (CheckBox)findViewById(R.id.cb_signup_show_password);
 
+      //Setup Progress dialog for later use
+      progressDialog = new ProgressDialog(this);
+      progressDialog.setCancelable(true);
+      progressDialog.setIndeterminate(true);
+      
       String phoneNumber = Utility.getDevicePhoneNumber(this);
       if (phoneNumber != null && !phoneNumber.isEmpty()) {
          etPhone.setText(Utility.purgePhoneNumber(phoneNumber));
@@ -57,6 +64,8 @@ public class SignupActivity extends Activity {
          Utility.enablePasswordTransformation(etPassword);
          Utility.enablePasswordTransformation(etConfirmPassword);
       }
+      
+     
    }
 
    public void onClick(View view) {
@@ -137,6 +146,9 @@ public class SignupActivity extends Activity {
          return;
       }
 
+      //Show progress dialog  now, we can dismiss it in Retrofit callback.
+      progressDialog.show();
+      
       String gcmRegistrationId = ApplicationSharedPreferences.getGCMClientRegistrationId(this);
       //if GCM registration id is empty then don't proceed.
       //There is something terribly wrong.
@@ -170,6 +182,10 @@ public class SignupActivity extends Activity {
                   "Server returned error during Singup");
             Log.i(TAG, response.getReason());
             Log.e(TAG, error.getStackTrace().toString());
+            //Dismiss the dialog waiting dialog.
+            if (progressDialog.isShowing()) {
+               progressDialog.dismiss();
+            }
          }
 
          @Override
@@ -182,7 +198,10 @@ public class SignupActivity extends Activity {
             //Treat successful signup as success sign in and save this information in 
             //shared preferences.
             ApplicationSharedPreferences.setSignedInFlag(context);
-            
+            //Dismiss the dialog waiting dialog.
+            if (progressDialog.isShowing()) {
+               progressDialog.dismiss();
+            }
             //Save user name in shared preference.
             ApplicationSharedPreferences.setUserName(context, etName.getText().toString());
             

@@ -24,7 +24,7 @@
     <!-- Text view -->
     <string name="tv_contact_name">contact name</string>
     <string name="tv_signup">Signup</string>
-    
+    <string name="no_contact">Add contacts</string>
     <!-- Image view -->
     <string name="iv_contact_image_desc">ETA receiver contact image</string>
     

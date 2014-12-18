@@ -17,7 +17,6 @@ import android.util.Log;
 
 public class GcmIntentService extends IntentService {
    private static final String TAG = GcmIntentService.class.getSimpleName();
-   private static final int NOTIFICATION_ID         = 1;
    
    private NotificationManager mNotificationManager;
 
