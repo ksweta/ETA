@@ -16,6 +16,7 @@ import org.json.JSONObject;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -104,12 +105,23 @@ LocationListener
          builder.include(latlng);
       }
 
+      StringBuilder snippet = new StringBuilder();
+      snippet.append(etaDetails.senderName);
+      
+      if(etaDetails.isSrcAddressAvailable()) {
+         snippet.append(" is currently near ")
+                .append(Utility.formatAddress(etaDetails.srcAddress))
+                .append(" and ");
+      }
+      snippet.append(" will arrive in ")
+             .append(etaDetails.eta);
+      
       map.animateCamera( CameraUpdateFactory
             .newLatLngBounds(builder.build(), 100));
 
       MarkerOptions markerOptions = new MarkerOptions();
       markerOptions.title(etaDetails.senderName + "'s ETA ")
-      .snippet(etaDetails.senderName + " will arrive in " +  etaDetails.eta)
+      .snippet(snippet.toString())
       .position(etaDetails.route.get(0))
       .icon((BitmapDescriptorFactory.fromResource(R.drawable.eta_location)));
 
@@ -127,10 +139,12 @@ LocationListener
          String senderName = bundle.getString(ApplicationConstants.GCM_MSG_SENDER_NAME, "");
          Double srcLatitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_SRC_LATITUDE));
          Double srcLongitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_SRC_LONGITUDE));
+         //SrcAddress can be null. 
+         Address srcAddress = bundle.getParcelable(ApplicationConstants.GCM_MSG_SRC_ADDRESS);
          Double dstLatitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LATITUDE, "0.0D"));
          Double dstLongitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LONGITUDE, "0.0D"));
          Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA, "0"));
-
+         
          
 //         Toast.makeText(this, 
 //               "From GCM " + srcLatitude.toString() + ", " + srcLongitude.toString(), 
@@ -151,6 +165,7 @@ LocationListener
          final EtaDetails etaDetails = new EtaDetails();
          etaDetails.senderName = senderName;
          etaDetails.senderPhone = senderPhone;
+         etaDetails.srcAddress = srcAddress;
          // this url will be used by AsyncTask
          etaDetails.url = url;
          if(!eta.equals(0)) {
@@ -282,17 +297,21 @@ LocationListener
       public String senderPhone;
       public String eta;
       public String url;
+      public Address srcAddress;
       
       public EtaDetails() {
          route = new LinkedList<LatLng>();
          eta = new String();
       }
-
+      
+      public boolean isSrcAddressAvailable(){
+         return srcAddress != null;
+      }
       @Override
       public String toString() {
          return "EtaDetails [route=" + route + ", senderName=" + senderName
                + ", senderPhone=" + senderPhone + ", eta=" + eta + ", url="
-               + url + "]";
+               + url + ", srcAddress=" + srcAddress + "]";
       }
    }
 }

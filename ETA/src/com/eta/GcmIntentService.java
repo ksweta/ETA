@@ -1,19 +1,25 @@
 package com.eta;
 
 
-import com.eta.util.ApplicationConstants;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import java.util.List;
+import java.util.Locale;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+
+import com.eta.util.ApplicationConstants;
+import com.eta.util.Utility;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 public class GcmIntentService extends IntentService {
    private static final String TAG = GcmIntentService.class.getSimpleName();
@@ -27,6 +33,7 @@ public class GcmIntentService extends IntentService {
 
    @Override
    protected void onHandleIntent(Intent intent) {
+      
       Bundle bundle = intent.getExtras();
       Log.d(TAG, "extras : " + bundle.toString());
       GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
@@ -69,11 +76,28 @@ public class GcmIntentService extends IntentService {
       Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA));
       String bigText = senderName + " sent you an ETA ";
       
-      //TODO improve the message, make it more meaningful.
-
-      String contentText = String.format("%s is running late.", 
-                                         senderName);
-
+      Address srcAddress = getSenderAddress(srcLatitude, srcLongitude);
+      String srcAddressString = "";
+      
+      if(srcAddress != null) {
+         //There could be scenario where address is null.
+         srcAddressString = Utility.formatAddress(srcAddress);
+         
+         //if Address is present then put it in intent bundle. It will be used by viewETAActivity.
+         bundle.putParcelable(ApplicationConstants.GCM_MSG_SRC_ADDRESS, 
+                              srcAddress);
+      }
+      
+      StringBuilder contentText = new StringBuilder();
+      
+      if(!srcAddressString.isEmpty()) {
+         contentText.append(String.format("%s is at %s and may be running late.",
+                                          senderName,
+                                          srcAddressString));
+      } else {
+         contentText.append(String.format("%s is running late.", 
+               senderName));
+      }
       Log.d(TAG, " Content Text : " + contentText);
       mNotificationManager = (NotificationManager)
             this.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -83,7 +107,7 @@ public class GcmIntentService extends IntentService {
       // to show the sender on the map.
       Intent viewETAIntent = new Intent(this, ViewETAActivity.class);
       viewETAIntent.putExtras(bundle);
-      
+     
       int iUniqueId = 0;
       //This logic will help to group the notification sent from same user(phone).
       if (senderPhone.length() > 5) {
@@ -117,6 +141,21 @@ public class GcmIntentService extends IntentService {
 
       //Time to show the notification.
       mNotificationManager.notify(iUniqueId, mBuilder.build());
-      
+   }
+   
+   private Address getSenderAddress(Double latitude, Double longitude) {
+      Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+      List<Address> addresses = null;
+      try {
+         addresses = geocoder.getFromLocation(latitude, longitude, 1);
+      } catch(Exception e) {
+         Log.e(TAG, e.getMessage(), e);
+      }
+      if(addresses != null && addresses.size() > 0) {
+         return addresses.get(0);
+      } else {
+         //If no address found then return null.
+         return null;
+      }
    }
 }

@@ -113,11 +113,14 @@ public class SignupActivity extends Activity {
          msg += "email\n";
          isError = true;
       }
-
+      
+      
+         
       if(phone.isEmpty()) {
          msg += "phone\n";
          isError = true;
       }
+    
       if (password.isEmpty()) {
          msg += "password\n";
          isError = true;
@@ -132,6 +135,13 @@ public class SignupActivity extends Activity {
          return;
       }
 
+    //Check the validity of email.
+      if (!Utility.isValidEmail(email)){
+         Utility.showErrorMessageWithOKButton(this, 
+                                              "Signup", 
+                                              "Please provide valid email address."); 
+      }
+      
       //Check if password doesn't match.
       if(!password.equals(confirmPassword)) {
          Utility.showErrorMessageWithOKButton(this, 

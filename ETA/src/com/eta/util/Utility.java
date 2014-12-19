@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.location.Address;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -42,6 +43,14 @@ public class Utility {
       return tMgr.getLine1Number();
    }
 
+   /**
+    * Helper method which forms Google map API URL.
+    * @param sourcelat Source latitude.
+    * @param sourcelog Source Longitude.
+    * @param destlat Destination latitude.
+    * @param destlog Destination longitude.
+    * @return Google map API URL.
+    */
    public static String makeLocationUrl(double sourcelat, double sourcelog, double destlat, double destlog ){
       Uri.Builder builder = new Uri.Builder();
       builder.scheme("http")
@@ -55,6 +64,7 @@ public class Utility {
 
       return builder.build().toString();
    }
+   
    /**
     * This method purge the extra character(s)  present in the phone string
     * e.g +1(510) 761-1364 => 5107611364
@@ -71,6 +81,12 @@ public class Utility {
       return phone;
    }
 
+   /**
+    * Helper method to format Latitude and Longitude for display.
+    * @param context  Application context object.
+    * @param currentLocation Location object which holds 
+    * @return returns formatted string.
+    */
    public static String getLatLng(Context context, Location currentLocation) {
       // If the location is valid
       if (currentLocation != null) {
@@ -236,5 +252,32 @@ public class Utility {
         text.append(seconds / SECOND).append(" seconds ");
      }
      return text.toString();
+  }
+  /**
+   * Helper method to validate email address. Returns true if given
+   * string matches with email pattern otherwise returns false.
+   * @param email 
+   * @return
+   */
+  public final static boolean isValidEmail(String email) {
+     return !email.isEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches();
+  }
+  /**
+   * This is a helper method to format the address into string.
+   * @param address
+   * @return
+   */
+  public static String formatAddress(Address address) {
+     StringBuilder sb = new StringBuilder();
+     
+     for(int index = 0; index < address.getMaxAddressLineIndex(); index++) {
+        sb.append(address.getAddressLine(index))
+        .append(",");
+     }
+     
+     //Add locality, it is usually city name.
+     sb.append(address.getLocality());
+     sb.append(",").append(address.getCountryName());
+     return sb.toString();
   }
 }
