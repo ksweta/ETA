@@ -27,6 +27,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.eta.data.EtaDetails;
 import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
@@ -95,39 +97,37 @@ LocationListener
    public void drawRoute(EtaDetails etaDetails) {
 
       PolylineOptions polylineOptions = new PolylineOptions();
-      polylineOptions.addAll(etaDetails.route).width(7.0f).color(Color.BLUE);
+      polylineOptions.addAll(etaDetails.getRoute()).width(12.0f).color(Color.argb(150, //Alpha
+                                                                                 //RED
+                                                                                 0,
+                                                                                 //Green
+                                                                                 0,
+                                                                                 //Blue
+                                                                                 250));
       map.addPolyline(polylineOptions);
 
       LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
       //Set the zoom to a level which can include the entire route.
-      for (LatLng latlng : etaDetails.route){
+      for (LatLng latlng : etaDetails.getRoute()){
          builder.include(latlng);
       }
+//      map.animateCamera( CameraUpdateFactory
+//            .newLatLngBounds(builder.build(), 300));
 
-      StringBuilder snippet = new StringBuilder();
-      snippet.append(etaDetails.senderName);
+      map.animateCamera(CameraUpdateFactory.newLatLngZoom(etaDetails.getRoute().get(0),
+                                                          12.0f));
       
-      if(etaDetails.isSrcAddressAvailable()) {
-         snippet.append(" is currently near ")
-                .append(Utility.formatAddress(etaDetails.srcAddress))
-                .append(" and ");
-      }
-      snippet.append(" will arrive in ")
-             .append(etaDetails.eta);
-      
-      map.animateCamera( CameraUpdateFactory
-            .newLatLngBounds(builder.build(), 100));
-
       MarkerOptions markerOptions = new MarkerOptions();
-      markerOptions.title(etaDetails.senderName + "'s ETA ")
-      .snippet(snippet.toString())
-      .position(etaDetails.route.get(0))
+      markerOptions.title(etaDetails.getSenderName())
+      .snippet(etaDetails.getEta())
+      .position(etaDetails.getRoute().get(0))
       .icon((BitmapDescriptorFactory.fromResource(R.drawable.eta_location)));
 
       Marker m = map.addMarker(markerOptions);
       //This will display the information window without even clicking it.
       m.showInfoWindow();
+  
    }
 
    private void getRouteDetails(){
@@ -144,6 +144,7 @@ LocationListener
          Double dstLatitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LATITUDE, "0.0D"));
          Double dstLongitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LONGITUDE, "0.0D"));
          Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA, "0"));
+         
          
          
 //         Toast.makeText(this, 
@@ -163,14 +164,14 @@ LocationListener
 //         Log.d(TAG, "lat long from Location manager : " + latLong);
 
          final EtaDetails etaDetails = new EtaDetails();
-         etaDetails.senderName = senderName;
-         etaDetails.senderPhone = senderPhone;
-         etaDetails.srcAddress = srcAddress;
+         etaDetails.setSenderName(senderName);
+         etaDetails.setSenderPhone(senderPhone);
+         etaDetails.setSrcAddress(srcAddress);
          // this url will be used by AsyncTask
-         etaDetails.url = url;
+         etaDetails.setUrl(url);
          if(!eta.equals(0)) {
             //Eta is not provided 
-            etaDetails.eta = Utility.convertSecondsToText(eta);
+            etaDetails.setEta(Utility.convertSecondsToText(eta));
          }
          //Created AsyncTask to get the route information from Google map server.
 
@@ -184,10 +185,10 @@ LocationListener
                EtaDetails etaDetails = params[0];
                
                try {
-                  Log.d(TAG, "URL : "+etaDetails.url);
+                  Log.d(TAG, "URL : "+etaDetails.getUrl());
                   HttpClient client = new DefaultHttpClient();
                   HttpGet request = new HttpGet();
-                  request.setURI(new URI(etaDetails.url));
+                  request.setURI(new URI(etaDetails.getUrl()));
                   response = client.execute(request);
                   responseText = EntityUtils.toString(response.getEntity());// extracts body of response
                   Log.d(TAG, "Response text : " + responseText);
@@ -202,10 +203,10 @@ LocationListener
 
                      JSONObject legObject = legs.getJSONObject(0);
 
-                     if(etaDetails.eta.isEmpty()) {
-                        etaDetails.eta = legObject.getJSONObject(TAG_DURATION).getString(TAG_TEXT);
+                     if(etaDetails.getEta().isEmpty()) {
+                        etaDetails.setEta(legObject.getJSONObject(TAG_DURATION).getString(TAG_TEXT));
                      }
-                     Log.d(TAG, "Duration : " + etaDetails.eta);
+                     Log.d(TAG, "Duration : " + etaDetails.getEta());
 
                      JSONArray steps = legObject.getJSONArray(TAG_STEPS);
 
@@ -215,12 +216,12 @@ LocationListener
                         JSONObject start_loc = steps.getJSONObject(i).getJSONObject(TAG_START_LOCATION);
                         end_loc = steps.getJSONObject(i).getJSONObject(TAG_END_LOCATION);
 
-                        etaDetails.route.add(new LatLng(start_loc.getDouble(TAG_LAT),
+                        etaDetails.getRoute().add(new LatLng(start_loc.getDouble(TAG_LAT),
                               start_loc.getDouble(TAG_LNG)));
                      }
 
                      if(end_loc != null) {
-                        etaDetails.route.add(new LatLng(end_loc.getDouble(TAG_LAT), 
+                        etaDetails.getRoute().add(new LatLng(end_loc.getDouble(TAG_LAT), 
                               end_loc.getDouble(TAG_LNG)));
                      }
                   }
@@ -263,6 +264,16 @@ LocationListener
    @Override
    public void onMapReady(GoogleMap map) {
       this.map = map;
+      //This is the right place to set InfoWindow adapter.
+      if(map!=null) {
+         map.setInfoWindowAdapter(new MapMarkerInfoWindowAdapter(this));
+         CameraPosition position = new CameraPosition(new LatLng(37.7208458D, -122.4845107), 
+                                                      13, 
+                                                      30, 
+                                                      0);
+         map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+      }
+      
       //When map is ready then display the route.
       getRouteDetails();
    }
@@ -289,29 +300,5 @@ LocationListener
 
    private boolean isLocationAvailable(){
       return currentLocation != null;
-   }
-
-   private class EtaDetails{
-      public List<LatLng> route;
-      public String senderName;
-      public String senderPhone;
-      public String eta;
-      public String url;
-      public Address srcAddress;
-      
-      public EtaDetails() {
-         route = new LinkedList<LatLng>();
-         eta = new String();
-      }
-      
-      public boolean isSrcAddressAvailable(){
-         return srcAddress != null;
-      }
-      @Override
-      public String toString() {
-         return "EtaDetails [route=" + route + ", senderName=" + senderName
-               + ", senderPhone=" + senderPhone + ", eta=" + eta + ", url="
-               + url + ", srcAddress=" + srcAddress + "]";
-      }
    }
 }

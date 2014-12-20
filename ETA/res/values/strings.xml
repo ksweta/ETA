@@ -27,7 +27,7 @@
     <string name="no_contact">Add contacts</string>
     <!-- Image view -->
     <string name="iv_contact_image_desc">ETA receiver contact image</string>
-    
+    <string name="map_marker">ETA map marker</string>
     <!-- Hints -->
     <string name="hint_name">Name</string>
     <string name="hint_email">Email</string>
@@ -40,6 +40,10 @@
     <!-- Misc. -->
     <string name="no_contacts">No Contacts Found</string>
     <string name="no_contact_selected">No Contact Selected</string>
+    <string name="map_marker_details_placeholder">Sender details</string>
+    <string name="map_market_eta_placeholder">ETA: 2 mins</string>
+    <string name="map_market_current_address">Currently near:</string>
+    <string name="map_marker_address_placeholder">Address line1\nAddress line2\nAddress line3</string>
     <string name="name_placeholder">Some name</string>
     <string name="phone_placeholder">5551112000</string>
     

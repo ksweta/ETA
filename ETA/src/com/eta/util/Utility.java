@@ -1,5 +1,7 @@
 package com.eta.util;
 
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
@@ -9,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -269,15 +272,40 @@ public class Utility {
    */
   public static String formatAddress(Address address) {
      StringBuilder sb = new StringBuilder();
+     if(address == null) {
+        //If Address object is null then return empty string.
+        return "";
+     }
      
      for(int index = 0; index < address.getMaxAddressLineIndex(); index++) {
         sb.append(address.getAddressLine(index))
-        .append(",");
+        .append("\n");
      }
      
-     //Add locality, it is usually city name.
-     sb.append(address.getLocality());
-     sb.append(",").append(address.getCountryName());
      return sb.toString();
+  }
+  
+  /**
+   * This is a helper method to get the address of the provided location.
+   * @param context Context of the application.
+   * @param latitude Latitude of the location.
+   * @param longitude Longitude of the location.
+   * @return Address of the given location, if it is able to find. Otherwise 
+   *         returns null.
+   */
+  public static Address getSenderAddress(Context context, Double latitude, Double longitude) {
+     Geocoder geocoder = new Geocoder(context, Locale.getDefault());
+     List<Address> addresses = null;
+     try {
+        addresses = geocoder.getFromLocation(latitude, longitude, 1);
+     } catch(Exception e) {
+        Log.e(TAG, e.getMessage(), e);
+     }
+     if(addresses != null && addresses.size() > 0) {
+        return addresses.get(0);
+     } else {
+        //If no address found then return null.
+        return null;
+     }
   }
 }

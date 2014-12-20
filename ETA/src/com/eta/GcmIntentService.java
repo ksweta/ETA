@@ -76,7 +76,7 @@ public class GcmIntentService extends IntentService {
       Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA));
       String bigText = senderName + " sent you an ETA ";
       
-      Address srcAddress = getSenderAddress(srcLatitude, srcLongitude);
+      Address srcAddress = Utility.getSenderAddress(this, srcLatitude, srcLongitude);
       String srcAddressString = "";
       
       if(srcAddress != null) {
@@ -141,21 +141,5 @@ public class GcmIntentService extends IntentService {
 
       //Time to show the notification.
       mNotificationManager.notify(iUniqueId, mBuilder.build());
-   }
-   
-   private Address getSenderAddress(Double latitude, Double longitude) {
-      Geocoder geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
-      List<Address> addresses = null;
-      try {
-         addresses = geocoder.getFromLocation(latitude, longitude, 1);
-      } catch(Exception e) {
-         Log.e(TAG, e.getMessage(), e);
-      }
-      if(addresses != null && addresses.size() > 0) {
-         return addresses.get(0);
-      } else {
-         //If no address found then return null.
-         return null;
-      }
    }
 }
