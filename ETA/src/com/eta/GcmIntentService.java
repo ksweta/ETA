@@ -1,8 +1,6 @@
 package com.eta;
 
 
-import java.util.List;
-import java.util.Locale;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -10,11 +8,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
-import android.location.Geocoder;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
+import android.text.Html;
 import android.util.Log;
 
 import com.eta.util.ApplicationConstants;
@@ -77,27 +75,16 @@ public class GcmIntentService extends IntentService {
       String bigText = senderName + " sent you an ETA ";
       
       Address srcAddress = Utility.getSenderAddress(this, srcLatitude, srcLongitude);
-      String srcAddressString = "";
       
       if(srcAddress != null) {
-         //There could be scenario where address is null.
-         srcAddressString = Utility.formatAddress(srcAddress);
-         
          //if Address is present then put it in intent bundle. It will be used by viewETAActivity.
          bundle.putParcelable(ApplicationConstants.GCM_MSG_SRC_ADDRESS, 
                               srcAddress);
       }
       
-      StringBuilder contentText = new StringBuilder();
       
-      if(!srcAddressString.isEmpty()) {
-         contentText.append(String.format("%s is at %s and may be running late.",
-                                          senderName,
-                                          srcAddressString));
-      } else {
-         contentText.append(String.format("%s is running late.", 
-               senderName));
-      }
+      String contentText = String.format("%s sent you an ETA.",
+                                          senderName);
       Log.d(TAG, " Content Text : " + contentText);
       mNotificationManager = (NotificationManager)
             this.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -121,6 +108,7 @@ public class GcmIntentService extends IntentService {
                                                               viewETAIntent,
                                                               PendingIntent.FLAG_UPDATE_CURRENT);
 
+      
 
       //Prepare the notification
       NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this)
@@ -132,7 +120,20 @@ public class GcmIntentService extends IntentService {
                                                                   .setAutoCancel(true)
                                                                   .setOngoing(false)
                                                                   .setGroup(ApplicationConstants.GCM_NOTIFICATION_GROUP_KEY);
-
+      if(srcAddress != null) {
+         NotificationCompat.InboxStyle inboxStyle =
+               new NotificationCompat.InboxStyle();
+         inboxStyle.setBigContentTitle("ETA Notification");
+         inboxStyle.addLine(Html.fromHtml(String.format("<strong>%s</strong>", contentText)));
+         //Form the Bigger message
+         inboxStyle.addLine(Html.fromHtml("<Strong>Currently near : </strong>"));
+         
+         for(int index = 0; index < srcAddress.getMaxAddressLineIndex(); index++) {
+            inboxStyle.addLine(srcAddress.getAddressLine(index));
+         }
+         inboxStyle.setSummaryText(Html.fromHtml("Click here to see his <strong>ETA</strong> on <strong>Map</strong>."));
+         mBuilder.setStyle(inboxStyle);
+      }
       //Set the content intent. This intent will launch the ViewETAActicity
       mBuilder.setContentIntent(contentIntent);
       // to add sound to the notification
