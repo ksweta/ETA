@@ -9,6 +9,8 @@
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <item name="android:actionBarStyle">@style/ETAActionBar</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.ETAStyle</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.ETAStyle</item>
     </style>
 
     <style name="ETAActionBar" parent="@android:style/Widget.Holo.Light.ActionBar">
@@ -21,7 +23,19 @@
     `        <item name="android:textColor">#FFFFFF</item>
              <item name="android:textSize">25sp</item>
     </style>
+   <!-- Style customization -->
+       <style name="PopupMenu.ETAStyle" parent="@android:style/Widget.Holo.Light.ListPopupWindow">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel</item> 
+    </style>
 
+    <style name="DropDownListView.ETAStyle" parent="@android:style/Widget.Holo.Light.ListView.DropDown">
+        <item name="android:listSelector">@drawable/selectable_background</item>
+    </style>
+     <style name="Theme.Example.Widget" parent="@android:style/Theme.Holo">
+        <item name="android:popupMenuStyle">@style/PopupMenu.ETAStyle</item>
+        <item name="android:dropDownListViewStyle">@style/DropDownListView.ETAStyle</item>
+    </style>
+    
     <style name="ContactListView">
         <item name="android:verticalScrollbarPosition">right</item>
         <item name="android:fastScrollAlwaysVisible">true</item>
