@@ -332,9 +332,10 @@ OnItemClickListener
    public void onBackPressed() {
       AlertDialog alert = new AlertDialog.Builder(this).create();
       alert.setTitle("Logout");
+      alert.setIcon(R.drawable.logout);
       alert.setMessage("Do you really want to logout?");
       alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new OnClickListener(){
-
+     
          @Override
          public void onClick(DialogInterface dialog, int which) {
             finish();
@@ -389,17 +390,13 @@ OnItemClickListener
          importContact();
          return true;
          
-      case R.id.action_invite_sms:
+      case R.id.action_invite:
          Log.d(TAG, "Invite sms action is pressed");
-         Toast.makeText(this, 
-                        "Invite is pressed", 
-                        Toast.LENGTH_SHORT).show();
          inviteContact("");
          return true;
             
       case R.id.action_logout:
          Log.d(TAG, "Logout action is pressed");
-         Toast.makeText(this, "Logout menu is pressed", Toast.LENGTH_SHORT).show();
          logOut();
          return true;
             
@@ -421,7 +418,7 @@ OnItemClickListener
       
       alert.setTitle("Delete contact");
       alert.setMessage("Do you really want to delete " + cd.getName() + "(" +cd.getPhone() +")?");
- 
+      alert.setIcon(R.drawable.delete);
       alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new OnClickListener() {
          
          @Override
@@ -474,6 +471,16 @@ OnItemClickListener
          if(progressDialog.isShowing()) {
             progressDialog.dismiss();
          }
+         Response response = error.getResponse();
+         if(response != null && response.getStatus() == TransportService.RESPONSE_NOT_FOUND) {
+            Toast.makeText(context,
+                           String.format("Contact %s(%s) is not yet registered.", contact.getName(), contact.getPhone()),
+                           Toast.LENGTH_SHORT).show();
+         } else {
+            Toast.makeText(context, 
+                           "Error while syncing contact\n" + error.getMessage(), 
+                           Toast.LENGTH_SHORT).show();
+         }
       }
 
       @Override
@@ -482,6 +489,9 @@ OnItemClickListener
          if(response.getStatus() == TransportService.RESPONSE_STATUS_OK) {
             contact.setRegistered(true);
             updateContact();
+            Toast.makeText(context,
+                  String.format("Contact %s(%s) is synced", contact.getName(), contact.getPhone()),
+                  Toast.LENGTH_SHORT).show();
          }
          Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
          if(progressDialog.isShowing()) {
