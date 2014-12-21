@@ -328,6 +328,29 @@ OnItemClickListener
                                             this);
    }
 
+   @Override 
+   public void onBackPressed() {
+      AlertDialog alert = new AlertDialog.Builder(this).create();
+      alert.setTitle("Logout");
+      alert.setMessage("Do you really want to logout?");
+      alert.setButton(AlertDialog.BUTTON_POSITIVE, "OK", new OnClickListener(){
+
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+            finish();
+         }
+      });
+ 
+      alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+         
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+            //NOP
+         }
+      });
+      
+      alert.show();
+   }
    /* Remove the locationlistener updates when Activity is paused */
    @Override
    protected void onPause() {

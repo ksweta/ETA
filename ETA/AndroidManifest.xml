@@ -68,7 +68,7 @@
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustPan"
             android:screenOrientation="portrait"
-            android:launchMode="singleTop" >
+            android:launchMode="singleInstance" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -79,7 +79,8 @@
             android:name=".SignupActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:launchMode="singleInstance" >
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -149,5 +150,4 @@
 
         <service android:name=".GcmIntentService" />
     </application>
-
 </manifest>

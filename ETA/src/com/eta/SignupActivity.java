@@ -69,6 +69,19 @@ public class SignupActivity extends Activity {
      
    }
 
+   @Override
+   protected void onResume(){
+      super.onResume();
+      //Reset the password field.
+      etPassword.setText("");
+   }
+   
+   @Override
+   protected void onPause(){
+      etPassword.setText("");
+      super.onPause();
+   }
+   
    public void onClick(View view) {
       switch(view.getId()) {
       case R.id.bt_signup:
