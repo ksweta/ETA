@@ -81,12 +81,12 @@ public class DBHelper extends SQLiteOpenHelper {
                                           DBHelper.COLUMN_SYNC_DATE};
 
       Cursor cursor = getReadableDatabase().query(DBHelper.TABLE_NAME_CONTACTS,
-            allColumns,
-            null,
-            null,
-            null,
-            null,
-            null);
+                                                  allColumns,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  null);
       List<ContactDetails> contactList = new LinkedList<ContactDetails>();
       if(cursor != null) {
          //cursor.moveToFirst();

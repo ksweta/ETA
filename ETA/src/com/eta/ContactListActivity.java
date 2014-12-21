@@ -133,9 +133,10 @@ OnItemClickListener
             break;
 
          case ADD_CONTACT_RESULT:
-            syncContact(intent.getExtras().getString(CONTACT_NAME),
-                  intent.getExtras().getString(CONTACT_PHONE));	
+            saveNewContact(intent.getExtras().getString(CONTACT_NAME),
+                           intent.getExtras().getString(CONTACT_PHONE));	
             break;
+            
          default:
             Log.w(TAG, "Different requestResult : "+requestResult);
          }
@@ -157,10 +158,10 @@ OnItemClickListener
       Log.d(TAG, "Contact URI : " + uri.toString());
 
       Cursor cursor = getContentResolver().query(uri,
-            null,
-            null,
-            null,
-            null);
+                                                null,
+                                                null,
+                                                null,
+                                                null);
       if (cursor != null) {
 
          int phoneColIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
@@ -183,31 +184,54 @@ OnItemClickListener
             alert.show();
             return;
          }
-
-         syncContact(name, phone);
-
+         saveNewContact(name, phone);
       }
    }
    /**
-    * Helper method to sync the registration status of the contact and save in DB.
-    * @param contact
+    * This is a helper method to save the contact in conatact list.
+    * 
+    * @param name  Contact name.
+    * @param phone Contact phone number.
     */
-   private void syncContact(String name, String phone){
-
+   private void saveNewContact(String name, String phone) {
       ContactDetails contact = new ContactDetails(name,
                                                   phone,
                                                   false,
                                                   new Date());
-      
+
+      long conId = db.insertContact(contact);
+      if (conId > 0) {
+         //If contact is added successfully then add it in the 
+         //contactList and notify the adapter.
+         contact.setId(conId);
+         contactList.add(contact);
+         contactListAdapter.notifyDataSetChanged();
+
+         //Notify user.
+         Toast.makeText(this, "Contact added successfully", Toast.LENGTH_SHORT).show();
+         Log.i(TAG, "Contact added successfully");
+         //Time to sync contact with ETA-Server.
+         syncContact(contact);
+      } else {
+         Toast.makeText(this, "Couldn't add contact", Toast.LENGTH_SHORT).show();
+         Log.e(TAG, "Couldn't add contact");
+      }
+   }
+  
+    /**
+    * Helper method to sync the registration status of the contact and save in DB.
+    * @param contacgt Contact details.
+    */
+   private void syncContact(ContactDetails contact){
       TransportService service = TransportServiceHelper.getTransportService();
       
-      service.isReceipientRegistered(new ReceipientRegisteredRequest(phone),
+      service.isReceipientRegistered(new ReceipientRegisteredRequest(contact.getPhone()),
                                      TransportService.HEADER_CONTENT_TYPE_JSON,
                                      TransportService.HEADER_ACCEPT_JSON,
                                      new ContactSyncCallback(this, 
                                                              db, 
-                                                             contactList, 
-                                                             contactListAdapter, 
+                                                             contactList,
+                                                             contactListAdapter,
                                                              contact));
    }
 
@@ -258,29 +282,27 @@ OnItemClickListener
 
          btn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-               String location = "";
-               Log.d(TAG, "Phone : " + contactList.get(position).getPhone());
+               
                if(!isLocationAvailable()) {
                   currentLocation = locationManager.getLastKnownLocation(locationProvider);
                }
                Log.d(TAG, "Location : " + currentLocation);
-               if(isLocationAvailable()) {
+              
                   if (contactList.get(position).isRegistered()) {
-                     location = Utility.getLatLng(context, locationManager.getLastKnownLocation(locationProvider));
-                     Log.d(TAG,  "Location : " + location);
+                     if(isLocationAvailable()) {
+                     Log.d(TAG,  "Location : " + Utility.getLatLng(context, 
+                           locationManager.getLastKnownLocation(locationProvider)));
+                     //Send notification.
                      sendETANotification(locationManager.getLastKnownLocation(locationProvider), 
-                                          contactList.get(position).getPhone());
+                                         contactList.get(position).getPhone());
+                     } else {
+                        Toast.makeText(context, 
+                                       "Couldn't send ETA because location is not available", 
+                                       Toast.LENGTH_SHORT).show();
+                     }
                   } else {
-                     Toast.makeText(context,
-                                    "Couldn't send ETA because receiver's phone is not registered", 
-                                    Toast.LENGTH_SHORT).show();
+                     updateUnregisteredContact(contactList.get(position));
                   }
-               } else {
-                  Toast.makeText(context, 
-                                 "Couldn't send ETA because location is not available", 
-                                 Toast.LENGTH_SHORT).show();
-               }
-                
             }
          });
 
@@ -315,99 +337,43 @@ OnItemClickListener
                          TransportService.HEADER_ACCEPT_JSON, 
                          new SendETACallback(context, receiverPhone));
       }
-   }
-
-   private class ContactSyncCallback implements Callback<Void> {
-      private final Context context;
-      private final DBHelper db;
-      private final List<ContactDetails> contactList;
-      private final ContactListAdapter contactListAdapter;
-      private final ContactDetails contact;
-
-      public ContactSyncCallback(Context c, 
-            DBHelper db, 
-            List<ContactDetails> contactList, 
-            ContactListAdapter contactListAdapter,
-            ContactDetails contact) {
-         this.context = c;
-         this.db = db;
-         this.contactList = contactList;
-         this.contactListAdapter = contactListAdapter;
-         this.contact = contact;
-      }
-
-      @Override
-      public void failure(RetrofitError error) {
-         contact.setRegistered(false);
-         insertContact();
-      }
-
-      @Override
-      public void success(Void voidresult, Response response) {
-
-         if(response.getStatus() == TransportService.RESPONSE_STATUS_OK) {
-            contact.setRegistered(true);
-            insertContact();
-         }
-
-         Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
-      }
-
-      private void insertContact() {
-         //Put the current time in the syncDate field.
-         contact.setSyncDate(new Date());
-         long conId = db.insertContact(contact);
-         if (conId > 0) {
-            //If contact is added successfully then add it in the 
-            //contactList and notify the adapter.
-            contact.setId(conId);
-            contactList.add(contact);
-            contactListAdapter.notifyDataSetChanged();
-
-            //Notify user.
-            Toast.makeText(context, "Contact added successfully", Toast.LENGTH_SHORT).show();
-            Log.i(TAG, "Contact added successfully");
-         } else {
-            Toast.makeText(context, "Couldn't add contact", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Couldn't add contact");
-         }
-      }
-   }
-   
-   
-   private class SendETACallback implements Callback<Void> {
-      private Context context;
-      private String receiverPhone;
-      public SendETACallback(Context context, String phone) {
-         this.context = context;
-         this.receiverPhone = phone;
-      }
-      @Override
-      public void failure(RetrofitError error) {
-         Toast.makeText(context, 
-                        "Server error : " + error.getMessage(), 
-                        Toast.LENGTH_SHORT).show();
-         Log.e(TAG, error.getMessage(), error.getCause());
-         if(progressDialog.isShowing()) {
-            progressDialog.dismiss();
-         }
-      }
-
-      @Override
-      public void success(Void voidResult, Response response) {
+      private void updateUnregisteredContact(final ContactDetails contact){
          
-         if(response.getStatus() == TransportService.RESPONSE_STATUS_OK){
-            Toast.makeText(context, "ETA sent successfully to " + receiverPhone, Toast.LENGTH_SHORT).show();
+         AlertDialog alert = new AlertDialog.Builder(context).create();
+         
+         alert.setTitle("Sync Contact");
+         alert.setMessage("Sync contact " + contact.getName() + "(" +contact.getPhone() +") ?");
+         alert.setButton(AlertDialog.BUTTON_POSITIVE,
+                         "Sync", new OnClickListener() {
+                           
+                           @Override
+                           public void onClick(DialogInterface dialog, int which) {
+                              //Show progress bar, and dismiss it in Retrofit callback methods.
+                              progressDialog.show();
+                              TransportService service = TransportServiceHelper.getTransportService();
+                              ReceipientRegisteredRequest request = new ReceipientRegisteredRequest(contact.getPhone());
+                              service.isReceipientRegistered(request,
+                                                             TransportService.HEADER_CONTENT_TYPE_JSON, 
+                                                             TransportService.HEADER_ACCEPT_JSON, 
+                                                             new ContactSyncCallback(context,
+                                                                                     db,
+                                                                                     contactList,
+                                                                                     contactListAdapter,
+                                                                                     contact));
+                           }
+                        });
+        alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+         
+         @Override
+         public void onClick(DialogInterface dialog, int which) {
+            //No Operation(NOP) 
          }
-            
-        Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
-        if(progressDialog.isShowing()) {
-           progressDialog.dismiss();
-        }
+      }); 
+        
+      alert.show();
       }
    }
-
-
+   
    private boolean isLocationAvailable(){
       return currentLocation != null;
    }
@@ -486,6 +452,7 @@ OnItemClickListener
             }
          }
       });
+      
       alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
          
          @Override
@@ -495,4 +462,94 @@ OnItemClickListener
       });
       alert.show();
    }
+   /////////////////////// Inner classes /////////////////////////////
+
+   private class ContactSyncCallback implements Callback<Void> {
+      private final Context context;
+      private final DBHelper db;
+      private final List<ContactDetails> contactList;
+      private final ContactListAdapter contactListAdapter;
+      private final ContactDetails contact;
+      public ContactSyncCallback(Context c, 
+                                 DBHelper db, 
+                                 List<ContactDetails> contactList,
+                                 ContactListAdapter contactListAdapter,
+                                 ContactDetails contact) {
+         this.context = c;
+         this.db = db;
+         this.contactList = contactList;
+         this.contactListAdapter = contactListAdapter;
+         this.contact = contact;
+         
+      }
+
+      @Override
+      public void failure(RetrofitError error) {
+         contact.setRegistered(false);
+         updateContact();
+         if(progressDialog.isShowing()) {
+            progressDialog.dismiss();
+         }
+      }
+
+      @Override
+      public void success(Void voidresult, Response response) {
+
+         if(response.getStatus() == TransportService.RESPONSE_STATUS_OK) {
+            contact.setRegistered(true);
+            updateContact();
+         }
+         Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
+         if(progressDialog.isShowing()) {
+            progressDialog.dismiss();
+         }
+      }
+      
+     private void updateContact() {
+        //Put the sync date first.
+        contact.setSyncDate(new Date());
+        if(db.updateContact(contact) > 0) {
+           //Notifiy Adapter about change.
+           contactListAdapter.notifyDataSetChanged();
+           
+        } else {
+           Toast.makeText(context, 
+                          "Couldn't update Contact " + contact.getPhone(), 
+                          Toast.LENGTH_SHORT).show();
+        }
+     }
+   }
+   
+   private class SendETACallback implements Callback<Void> {
+      private Context context;
+      private String receiverPhone;
+      public SendETACallback(Context context, String phone) {
+         this.context = context;
+         this.receiverPhone = phone;
+      }
+      @Override
+      public void failure(RetrofitError error) {
+         Toast.makeText(context, 
+                        "Server error : " + error.getMessage(), 
+                        Toast.LENGTH_SHORT).show();
+         Log.e(TAG, error.getMessage(), error.getCause());
+         if(progressDialog.isShowing()) {
+            progressDialog.dismiss();
+         }
+      }
+
+      @Override
+      public void success(Void voidResult, Response response) {
+         
+         if(response.getStatus() == TransportService.RESPONSE_STATUS_OK){
+            Toast.makeText(context, "ETA sent successfully to " + receiverPhone, Toast.LENGTH_SHORT).show();
+         }
+            
+        Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
+        if(progressDialog.isShowing()) {
+           progressDialog.dismiss();
+        }
+      }
+   }
+
 }
