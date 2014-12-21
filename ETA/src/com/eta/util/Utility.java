@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.telephony.TelephonyManager;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
+import android.view.ViewConfiguration;
 import android.widget.EditText;
 
 import com.eta.R;

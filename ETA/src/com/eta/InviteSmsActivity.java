@@ -53,6 +53,8 @@ public class InviteSmsActivity extends Activity {
       if(phone.isEmpty() || phone.length() != ApplicationConstants.PHONE_NUMBER_LENGTH) {
          errorMsg += "Invalid phone\n";
          isError = true;
+         etPhone.setFocusableInTouchMode(true);
+         etPhone.requestFocus();
       }
       if(message.isEmpty()) {
          errorMsg += "Empty message\n";
@@ -75,11 +77,20 @@ public class InviteSmsActivity extends Activity {
    @Override
    protected void onResume() {
       super.onResume();
-      Intent intent = getIntent();
-      String phone = intent.getExtras().getString(ApplicationConstants.INVITE_SMS_PHONE);
+      Bundle extra = getIntent().getExtras();
+      
+      String phone = extra.getString(ApplicationConstants.INVITE_SMS_PHONE, "");
       String senderPhone = Utility.purgePhoneNumber(Utility.getDevicePhoneNumber(this));
       String userName = ApplicationSharedPreferences.getUserName(this);
-      etPhone.setText(phone);
+      
+      if(phone.isEmpty()) {
+         //request focus
+         etPhone.setFocusableInTouchMode(true);
+         etPhone.requestFocus();
+      } else {
+         etPhone.setText(phone);
+      }
+      
       String message = String.format("<strong>%s(%s)</strong> invites you to use Android <strong>ETA application</strong>. "
                                      + "This application keeps you updated about sender's <strong>ETA</strong>.", 
                                      userName,

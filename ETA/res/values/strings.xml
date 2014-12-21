@@ -39,6 +39,12 @@
     <string name="hint_contact_phone">Contact phone</string>
     <string name="hint_invite_msg">Invite message</string>
     
+    <!-- Menu -->
+    <string name="action_invite_sms">Invite</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_add_contact">Add Contact</string>
+    <string name="action_import_contact">Import Contact</string>
+    
     <!-- Misc. -->
     <string name="no_contacts">No Contacts Found</string>
     <string name="no_contact_selected">No Contact Selected</string>

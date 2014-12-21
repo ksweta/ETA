@@ -67,7 +67,8 @@
             android:name=".SignInActivity"
             android:label="@string/app_name"
             android:windowSoftInputMode="adjustPan"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
