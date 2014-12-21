@@ -24,4 +24,7 @@ public interface ApplicationConstants {
    
    //ETA notification
    String GCM_NOTIFICATION_GROUP_KEY = "GCM_NOTIFICATION_GROUP_KEY";
+   
+   //Invite related constants.
+   String INVITE_SMS_PHONE = "INVITE_SMS_PHONE";
 }

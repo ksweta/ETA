@@ -18,6 +18,7 @@ import com.eta.transport.SignupRequest;
 import com.eta.transport.TransportService;
 import com.eta.transport.TransportServiceHelper;
 import com.eta.transport.User;
+import com.eta.util.ApplicationConstants;
 import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 
@@ -120,7 +121,11 @@ public class SignupActivity extends Activity {
          msg += "phone\n";
          isError = true;
       }
-    
+     if( phone.length() != ApplicationConstants.PHONE_NUMBER_LENGTH) {
+        msg += "Invalid phone\n";
+        isError = true;
+     }
+     
       if (password.isEmpty()) {
          msg += "password\n";
          isError = true;
@@ -155,8 +160,6 @@ public class SignupActivity extends Activity {
          etPassword.requestFocus();
          return;
       }
-
-     
       
       String gcmRegistrationId = ApplicationSharedPreferences.getGCMClientRegistrationId(this);
       //if GCM registration id is empty then don't proceed.

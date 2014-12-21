@@ -158,10 +158,10 @@ OnItemClickListener
       Log.d(TAG, "Contact URI : " + uri.toString());
 
       Cursor cursor = getContentResolver().query(uri,
-                                                null,
-                                                null,
-                                                null,
-                                                null);
+                                                 null,
+                                                 null,
+                                                 null,
+                                                 null);
       if (cursor != null) {
 
          int phoneColIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
@@ -342,7 +342,7 @@ OnItemClickListener
          AlertDialog alert = new AlertDialog.Builder(context).create();
          
          alert.setTitle("Sync Contact");
-         alert.setMessage("Sync contact " + contact.getName() + "(" +contact.getPhone() +") ?");
+         alert.setMessage("Sync or invite contact " + contact.getName() + "(" +contact.getPhone() +")");
          alert.setButton(AlertDialog.BUTTON_POSITIVE,
                          "Sync", new OnClickListener() {
                            
@@ -360,6 +360,19 @@ OnItemClickListener
                                                                                      contactList,
                                                                                      contactListAdapter,
                                                                                      contact));
+                           }
+                        });
+         alert.setButton(AlertDialog.BUTTON_NEUTRAL, 
+                         "Invite", 
+                         new OnClickListener() {
+                           
+                           @Override
+                           public void onClick(DialogInterface dialog, int which) {
+                              Intent intent = new Intent(context, InviteSmsActivity.class);
+                              intent.putExtra(ApplicationConstants.INVITE_SMS_PHONE, 
+                                              contact.getPhone());
+                              intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP|Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                              startActivity(intent);
                            }
                         });
         alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {

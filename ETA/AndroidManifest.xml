@@ -24,6 +24,9 @@
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!-- Permission for sending invite sms -->
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    
     <permission
         android:name="com.eta.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -113,6 +116,18 @@
             </intent-filter>
         </activity>
 
+         <activity
+            android:name=".InviteSmsActivity"
+            android:label="@string/app_name"
+            android:windowSoftInputMode="adjustPan"
+            android:screenOrientation="portrait"
+            android:launchMode="singleTop" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyBRvlgwWmRPaylY-fwcQIDOb9Wr1J30KzY" />
