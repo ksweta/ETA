@@ -235,6 +235,8 @@ public class SignupActivity extends Activity {
             
             //Time to launch ContactListActivity
             startActivity(new Intent(context, ContactListActivity.class));
+            //Time to finish this activity.
+            finish();
          }
       });
    }
