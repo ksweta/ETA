@@ -197,52 +197,57 @@ public class SignupActivity extends Activity {
                            gcmRegistrationId);
 
       service.signUp(new SignupRequest(user),
-            TransportService.HEADER_CONTENT_TYPE_JSON,
-            TransportService.HEADER_ACCEPT_JSON,
-            new Callback<Void>() {
-
-         @Override
-         public void failure(RetrofitError error) {
-
-            Response response = error.getResponse();
-            Utility.showErrorMessageWithOKButton(getApplicationContext(), 
-                  "Signup error", 
-                  "Server returned error during Singup");
-            if(response != null) {
-               Log.i(TAG, response.getReason());
-               Log.e(TAG, error.getStackTrace().toString());
-            }
-            //Dismiss the dialog waiting dialog.
-            if (progressDialog.isShowing()) {
-               progressDialog.dismiss();
-            }
-         }
-
-         @Override
-         public void success(Void voidreturn, Response response) {
-            Log.i(TAG, " STATUS : " + String.valueOf(response.getStatus()));
-            Context context = getApplicationContext();
-            Toast.makeText(context,
-                  "Successfully Signup", 
-                  Toast.LENGTH_SHORT).show();
-            //Treat successful signup as success sign in and save this information in 
-            //shared preferences.
-            ApplicationSharedPreferences.setSignedInFlag(context);
-            //Dismiss the dialog waiting dialog.
-            if (progressDialog.isShowing()) {
-               progressDialog.dismiss();
-            }
-            //Save user name in shared preference.
-            ApplicationSharedPreferences.setUserName(context, etName.getText().toString());
-            
-            //Time to launch ContactListActivity
-            startActivity(new Intent(context, ContactListActivity.class));
-            //Time to finish this activity.
-            finish();
-         }
-      });
+                     TransportService.HEADER_CONTENT_TYPE_JSON,
+                     TransportService.HEADER_ACCEPT_JSON,
+                     new SignupCallback(this));
+   }
+private class SignupCallback implements Callback<Void> {
+   private Context context;
+   public SignupCallback(Context context) {
+      this.context = context;
+   }
+   @Override
+   public void failure(RetrofitError error) {
+      Response response = error.getResponse();
+      
+      if(response != null &&  response.getStatus() == TransportService.RESPONSE_CONFLICT) {
+         Log.i(TAG, response.getReason());
+         Utility.showErrorMessageWithOKButton(context, 
+               "Signup error", 
+               "Phone already registered.");
+      } else {
+         Utility.showErrorMessageWithOKButton(context, 
+               "Signup error", 
+               "Server returned error during Singup");
+      }
+      //Dismiss the dialog waiting dialog.
+      if (progressDialog.isShowing()) {
+         progressDialog.dismiss();
+      }
    }
 
+   @Override
+   public void success(Void voidreturn, Response response) {
+      Log.i(TAG, " STATUS : " + String.valueOf(response.getStatus()));
+      Toast.makeText(context,
+            "Successfully Signup", 
+            Toast.LENGTH_SHORT).show();
+      //Treat successful signup as success sign in and save this information in 
+      //shared preferences.
+      ApplicationSharedPreferences.setSignedInFlag(context);
+      //Dismiss the dialog waiting dialog.
+      if (progressDialog.isShowing()) {
+         progressDialog.dismiss();
+      }
+      //Save user name in shared preference.
+      ApplicationSharedPreferences.setUserName(context, etName.getText().toString());
+      
+      //Time to launch ContactListActivity
+      startActivity(new Intent(context, ContactListActivity.class));
+      //Time to finish this activity.
+      finish();
+   }
+}
    private void showPassword() {
       if (cbShowPassword.isChecked()) {
          //Disable the transformation method to show password.

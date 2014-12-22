@@ -27,7 +27,7 @@ public interface TransportService {
    int RESPONSE_UNAUTHORIZED = 401;
    int RESPONSE_FORBIDDEN = 403;
    int RESPONSE_NOT_FOUND = 404;
-
+   int RESPONSE_CONFLICT = 409;
    //Used for Sign up
    @POST("/users.json")
    void signUp(@Body 
