@@ -208,8 +208,10 @@ public class SignupActivity extends Activity {
             Utility.showErrorMessageWithOKButton(getApplicationContext(), 
                   "Signup error", 
                   "Server returned error during Singup");
-            Log.i(TAG, response.getReason());
-            Log.e(TAG, error.getStackTrace().toString());
+            if(response != null) {
+               Log.i(TAG, response.getReason());
+               Log.e(TAG, error.getStackTrace().toString());
+            }
             //Dismiss the dialog waiting dialog.
             if (progressDialog.isShowing()) {
                progressDialog.dismiss();
