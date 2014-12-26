@@ -208,6 +208,11 @@ private class SignupCallback implements Callback<Void> {
    }
    @Override
    public void failure(RetrofitError error) {
+      //Dismiss the dialog waiting dialog.
+      if (progressDialog.isShowing()) {
+         progressDialog.dismiss();
+      }
+      
       Response response = error.getResponse();
       
       if(response != null &&  response.getStatus() == TransportService.RESPONSE_CONFLICT) {
@@ -219,10 +224,6 @@ private class SignupCallback implements Callback<Void> {
          Utility.showErrorMessageWithOKButton(context, 
                "Signup error", 
                "Server returned error during Singup");
-      }
-      //Dismiss the dialog waiting dialog.
-      if (progressDialog.isShowing()) {
-         progressDialog.dismiss();
       }
    }
 

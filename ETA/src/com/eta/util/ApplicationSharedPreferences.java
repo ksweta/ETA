@@ -16,7 +16,7 @@ public class ApplicationSharedPreferences {
 
    public static SharedPreferences getSharedPreferences(Context context){
       return context.getSharedPreferences(ApplicationConstants.SHARED_PREFERENCE_FILE,
-            Context.MODE_PRIVATE);
+                                          Context.MODE_PRIVATE);
    }
    /**
     * This method stores the GCM client registration id in shared preferences.

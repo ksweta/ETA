@@ -1,8 +1,6 @@
 package com.eta;
 
 import java.net.URI;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -25,7 +23,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.eta.data.EtaDetails;
 import com.eta.util.ApplicationConstants;
@@ -63,7 +60,9 @@ LocationListener
    private final static String TAG_LNG = "lng";
 
    private GoogleMap map;
-
+   //To persiste and restore the state of Google map.
+   private MapStateManager mapStateManager;
+   
    //This reference will get updated many places whenever
    //application detects that the location has changed.
    private Location currentLocation;
@@ -89,9 +88,12 @@ LocationListener
       if(!Utility.isGpsEnabled(this)){
          Utility.getGpsDisableAlert(this).show();
       }
+      
       //Get the location manager.
       locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
       locationProvider = locationManager.getBestProvider(new Criteria(), true);
+      
+      mapStateManager = new MapStateManager(this);
    }
 
    public void drawRoute(EtaDetails etaDetails) {
@@ -144,8 +146,6 @@ LocationListener
          Double dstLatitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LATITUDE, "0.0D"));
          Double dstLongitude = Double.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_DST_LONGITUDE, "0.0D"));
          Integer eta = Integer.valueOf(bundle.getString(ApplicationConstants.GCM_MSG_ETA, "0"));
-         
-         
          
 //         Toast.makeText(this, 
 //               "From GCM " + srcLatitude.toString() + ", " + srcLongitude.toString(), 
@@ -247,11 +247,18 @@ LocationListener
    /* Request updates at startup */
    @Override
    protected void onResume() {
+      //Call super class onResume method first.
       super.onResume();
+      //Request locationManager for location updates
       locationManager.requestLocationUpdates(locationProvider, 
-            100, //Minimum time between update in milliseconds
-            1, //Minimum distance in meters
-            this);
+                                             100, //Minimum time between update in milliseconds
+                                             1, //Minimum distance in meters
+                                             this);
+      if (map != null){
+         CameraPosition position = mapStateManager.getSavedCameraPosition();
+         map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+         map.setMapType(mapStateManager.getMapType());
+      }
    }
 
    /* Remove the locationlistener updates when Activity is paused */
@@ -259,6 +266,10 @@ LocationListener
    protected void onPause() {
       super.onPause();
       locationManager.removeUpdates(this);
+      //Store the state of map if it is not null
+      if (map != null) {
+         mapStateManager.saveMapState(map);
+      }
    }
 
    @Override
@@ -267,11 +278,9 @@ LocationListener
       //This is the right place to set InfoWindow adapter.
       if(map!=null) {
          map.setInfoWindowAdapter(new MapMarkerInfoWindowAdapter(this));
-         CameraPosition position = new CameraPosition(new LatLng(37.7208458D, -122.4845107), 
-                                                      13, 
-                                                      30, 
-                                                      0);
+         CameraPosition position = mapStateManager.getSavedCameraPosition();
          map.moveCamera(CameraUpdateFactory.newCameraPosition(position));
+         map.setMapType(mapStateManager.getMapType());
       }
       
       //When map is ready then display the route.

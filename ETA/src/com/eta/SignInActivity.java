@@ -12,10 +12,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.AlphaAnimation;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 
 import com.eta.task.GcmRegistrationTask;
 import com.eta.transport.SignInRequest;
@@ -34,12 +32,11 @@ public class SignInActivity extends Activity {
    private EditText etPassword;
    private CheckBox cbShowPassword;
    private ProgressDialog progressDialog;
-   
+
    //Gcm related
    private GoogleCloudMessaging gcm;
    private String gcmClientRegId;
-  
-   
+
    @Override
    protected void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
@@ -73,7 +70,7 @@ public class SignInActivity extends Activity {
          cbShowPassword.setChecked(false);
          Utility.enablePasswordTransformation(etPassword);
       }
-      
+
       // Check device for Play Services APK.
       if (checkPlayServices()) {
          // If this check succeeds, proceed with normal processing.
@@ -117,6 +114,7 @@ public class SignInActivity extends Activity {
          break;
       }
    }
+
    /**
     * This method manages the signin and starts ContactListActivity
     */
@@ -157,6 +155,7 @@ public class SignInActivity extends Activity {
             TransportService.HEADER_ACCEPT_JSON, 
             callback);
    }
+
    /**
     * This method starts Signup activity
     */
@@ -164,6 +163,7 @@ public class SignInActivity extends Activity {
       Intent intent = new Intent(this, SignupActivity.class);
       startActivity(intent);
    }
+
    /**
     * This is a helper method which disables password inputType and make it normal.
     */
@@ -182,7 +182,7 @@ public class SignInActivity extends Activity {
          Log.d(TAG, "Enabled password transformation");
       }
    }
-   
+
    /**
     * Check the device to make sure it has the Google Play Services APK. If
     * it doesn't, display a dialog that allows users to download the APK from
@@ -213,7 +213,6 @@ public class SignInActivity extends Activity {
       return true;
    }
 
-   
    /**
     * This class implements Callback interface of Retrofit. It will be used while making 
     * signIn() method call. 
@@ -224,6 +223,7 @@ public class SignInActivity extends Activity {
       public SignInCallback(Context c) {
          this.context = c;
       }
+
       @Override
       public void failure(RetrofitError error) {
          Response response = error.getResponse();
