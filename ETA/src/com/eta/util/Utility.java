@@ -169,7 +169,7 @@ public class Utility {
       alert.setTitle("Enable Network");
       alert.setMessage("You network connection is not active. Please enable it");
       alert.setIcon(R.drawable.network);
-      alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new OnClickListener() {
+      alert.setButton(AlertDialog.BUTTON_POSITIVE, "Settings", new OnClickListener() {
          
          @Override
          public void onClick(DialogInterface dialog, int which) {
@@ -177,7 +177,7 @@ public class Utility {
             context.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
          }
       });
-      alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+      alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Ignore", new OnClickListener() {
          
          @Override
          public void onClick(DialogInterface dialog, int which) {
@@ -190,32 +190,38 @@ public class Utility {
       return alert;
    }
    /**
-    * This method checks if the GPS service provider is enable or not. It returns
-    * true if the GPS provider is enabled otherwise false.
+    * This method checks if the location service provider is enable or not. It returns
+    * true if any location service provider is enabled otherwise false.
     * 
     * @param context
     * @return returns true if the GPS provider is enabled otherwise false.
     */
-  public static boolean isGpsEnabled(Context context){
+  public static boolean isLocationServiceEnabled(Context context){
      LocationManager service = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-     return service.isProviderEnabled(LocationManager.GPS_PROVIDER);
+     
+     return service.isProviderEnabled(LocationManager.GPS_PROVIDER) 
+           || service.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
   }
+  
   /**
-   * This is a helper method to provide a alert message for GPS disabled. 
-   * This can be used to show an alert to user when GPS is disabled.
-   * The alert box has two buttons i.e OK and Cancel. If user presses
-   * OK then application will redirect user to GPS setting. If user 
-   * selects Cancel button then application doesn't do anything.  
+   * This is a helper method to provide a alert message for enabling
+   * location service. This can be used to show an alert to user when
+   * location service is disabled. The alert box has two buttons 
+   * i.e OK and Cancel. If user presses OK then application will 
+   * redirect user to location service setting. If user selects Cancel
+   * button then application doesn't do anything.  
    * @param context
    * @return
    */
-  public static AlertDialog getGpsDisableAlert(final Context context) {
+  public static AlertDialog getEnableLocationServiceAlertDialog(final Context context) {
      AlertDialog alert = new AlertDialog.Builder(context).create();
      
-     alert.setTitle("GPS");
-     alert.setMessage("GPS provider is disabled. Please enable it");
+     alert.setTitle("Location service");
+     alert.setMessage("Location service is disabled. Please enable it. For better accuracy,"
+           + " enable GPS location service provider.");
      alert.setIcon(R.drawable.gps);
-     alert.setButton(AlertDialog.BUTTON_POSITIVE, "Ok", new OnClickListener() {
+     alert.setCancelable(false);
+     alert.setButton(AlertDialog.BUTTON_POSITIVE, "Settings", new OnClickListener() {
         
         @Override
         public void onClick(DialogInterface dialog, int which) {
@@ -223,12 +229,12 @@ public class Utility {
            context.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
         }
      });
-     alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel", new OnClickListener() {
+     alert.setButton(AlertDialog.BUTTON_NEGATIVE, "Ignore", new OnClickListener() {
         
         @Override
         public void onClick(DialogInterface dialog, int which) {
            //Don't do anything if cancel button is chosen.
-           Log.d(TAG, "GPS alert, cancel button is clicked");
+           Log.d(TAG, "Enable location service dialog cancel button is clicked");
         }
      });
      return alert;

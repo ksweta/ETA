@@ -25,6 +25,7 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
 import com.eta.data.EtaDetails;
+import com.eta.location.LocationCriteriaFactory;
 import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -85,13 +86,12 @@ LocationListener
       mapFragment.getMapAsync(this);
 
       //If GPS is disabled then show an alert to User.
-      if(!Utility.isGpsEnabled(this)){
-         Utility.getGpsDisableAlert(this).show();
+      if(!Utility.isLocationServiceEnabled(this)){
+         Utility.getEnableLocationServiceAlertDialog(this).show();
       }
       
       //Get the location manager.
       locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-      locationProvider = locationManager.getBestProvider(new Criteria(), true);
       
       mapStateManager = new MapStateManager(this);
    }
@@ -114,8 +114,6 @@ LocationListener
       for (LatLng latlng : etaDetails.getRoute()){
          builder.include(latlng);
       }
-//      map.animateCamera( CameraUpdateFactory
-//            .newLatLngBounds(builder.build(), 300));
 
       map.animateCamera(CameraUpdateFactory.newLatLngZoom(etaDetails.getRoute().get(0),
                                                           12.0f));
@@ -183,7 +181,7 @@ LocationListener
                HttpResponse response = null;
                String responseText = null;
                EtaDetails etaDetails = params[0];
-               
+
                try {
                   Log.d(TAG, "URL : "+etaDetails.getUrl());
                   HttpClient client = new DefaultHttpClient();
@@ -249,10 +247,13 @@ LocationListener
    protected void onResume() {
       //Call super class onResume method first.
       super.onResume();
-      //Request locationManager for location updates
+      
+      locationProvider = locationManager.getBestProvider(LocationCriteriaFactory.createCoarseCriteria(), 
+                                                         true);
+      //Request locationManager for location updates at faster rate.
       locationManager.requestLocationUpdates(locationProvider, 
-                                             100, //Minimum time between update in milliseconds
-                                             1, //Minimum distance in meters
+                                             0, //Minimum time between update in milliseconds
+                                             0, //Minimum distance in meters
                                              this);
       if (map != null){
          CameraPosition position = mapStateManager.getSavedCameraPosition();
@@ -265,7 +266,7 @@ LocationListener
    @Override
    protected void onPause() {
       super.onPause();
-      locationManager.removeUpdates(this);
+      
       //Store the state of map if it is not null
       if (map != null) {
          mapStateManager.saveMapState(map);
@@ -290,6 +291,9 @@ LocationListener
    @Override
    public void onLocationChanged(Location location) {
       currentLocation = location;
+      //Once location is available, just remove the location update listener.
+      locationManager.removeUpdates(this);
+      Log.d(TAG, "onLocationChanged() => location update listener is removed.");
    }
 
    @Override

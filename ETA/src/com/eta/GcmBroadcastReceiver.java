@@ -1,5 +1,7 @@
 package com.eta;
 
+import com.eta.service.GcmIntentService;
+
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;

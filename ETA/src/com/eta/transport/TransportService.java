@@ -80,11 +80,10 @@ public interface TransportService {
     * @param callback
     */
    @POST("/notification/sendETA.json")
-   void sendETA(@Body 
-                ETANotificationRequest request, 
-                @Header("Content-Type") 
-                String contentType,
-                @Header("Accept") 
-                String accept,
-                Callback<Void> callback);
+   retrofit.client.Response sendETA(@Body 
+                                    ETANotificationRequest request, 
+                                    @Header("Content-Type") 
+                                    String contentType,
+                                    @Header("Accept") 
+                                    String accept);
 }

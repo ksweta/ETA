@@ -15,7 +15,6 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.database.Cursor;
-import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -43,6 +42,8 @@ import android.widget.Toast;
 
 import com.eta.data.ContactDetails;
 import com.eta.db.DBHelper;
+import com.eta.location.LocationCriteriaFactory;
+import com.eta.service.SendEtaService;
 import com.eta.transport.ETANotificationRequest;
 import com.eta.transport.ReceipientRegisteredRequest;
 import com.eta.transport.TransportService;
@@ -52,7 +53,6 @@ import com.eta.util.ApplicationSharedPreferences;
 import com.eta.util.Utility;
 
 public class ContactListActivity extends Activity  implements 
-LocationListener,
 OnItemClickListener
 {
    //Constants
@@ -62,18 +62,20 @@ OnItemClickListener
    public static final String CONTACT_NAME = "CONTACT_NAME";
    public static final String CONTACT_PHONE = "CONTACT_PHONE";
    
+   //Max time for listing for Location updates
+   private static final int MAX_LOCATION_UPDATE_TIME = 1000 * 60 * 10; //In milliseconds
+   private static final int MAX_LOCATION_UPDATE_COUNT = 5;
+   private static final float DESIRED_ACCURACY = 60.0f;// In meter
+
    private ListView lvContacts;
-   private View emptyView; 
+   private View emptyView;
    private ProgressDialog progressDialog;
    
    private List<ContactDetails> contactList;
    private DBHelper db;
    private ContactListAdapter contactListAdapter;
-   //This reference will get updated many places whenever
-   //application detects that the location has changed.
-   private Location currentLocation;
-   private LocationManager locationManager;
-   private String locationProvider;
+   
+  
    
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -85,25 +87,18 @@ OnItemClickListener
       progressDialog = new ProgressDialog(this);
       progressDialog.setCancelable(true);
       progressDialog.setIndeterminate(true);
-      
+
       db = new DBHelper(this);
       contactList = db.readAllContacts();
       contactListAdapter = new ContactListAdapter(this, R.layout.contact_list_item);
       lvContacts.setAdapter(contactListAdapter);
-       
+
       //If GPS is disabled then show an alert to User.
-      if(!Utility.isGpsEnabled(this)){
-         Utility.getGpsDisableAlert(this).show();
+      if(!Utility.isLocationServiceEnabled(this)){
+         Utility.getEnableLocationServiceAlertDialog(this).show();
       }
-      
-      //Get the location manager.
-      locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-      locationProvider = locationManager.getBestProvider(new Criteria(), true);
-      Log.d(TAG, "Location provider : " + locationProvider);
-      //Toast.makeText(this, "LocationProvider : " + locationProvider, Toast.LENGTH_SHORT).show();
-      
+
       lvContacts.setOnItemClickListener(this);
-      
       //Enable overflow menu for Android < 4.4.
       getOverflowMenu();
    }
@@ -293,39 +288,15 @@ OnItemClickListener
                                                              contact));
    }
 
-   private boolean isLocationAvailable(){
-      return currentLocation != null;
-   }
-   
-   @Override
-   public void onLocationChanged(Location location) {
-      currentLocation = location;
-      Log.d(TAG, "onLocationChanged : " + location.toString());
-   }
-
-   @Override
-   public void onStatusChanged(String provider, int status, Bundle extras) {
-     Log.d(TAG, "Provider " + provider + " status changed to " + status);
-   }
-
-   @Override
-   public void onProviderEnabled(String provider) {
-      Log.d(TAG, "Provider " + provider + " is enabled");
-   }
-
-   @Override
-   public void onProviderDisabled(String provider) {
-     Log.d(TAG, "Provider " + provider + " is disabled");
-   }
-   
-   /* Request updates at startup */
    @Override
    protected void onResume() {
-     super.onResume();
-     locationManager.requestLocationUpdates(locationProvider, 
-                                            100, //Minimum time between update in milliseconds
-                                            1, //Minimum distance in meters
-                                            this);
+      super.onResume();
+      
+   }
+
+   @Override
+   protected void onPause() {
+     super.onPause();
    }
 
    @Override 
@@ -352,13 +323,7 @@ OnItemClickListener
       
       alert.show();
    }
-   /* Remove the locationlistener updates when Activity is paused */
-   @Override
-   protected void onPause() {
-     super.onPause();
-     locationManager.removeUpdates(this);
-   }
-   
+
    @Override
    public void onContentChanged() {
       super.onContentChanged();
@@ -443,6 +408,68 @@ OnItemClickListener
       });
       alert.show();
    }
+
+   /**
+    * A helper method to determine the better locate between two locate results.
+    * @param location
+    * @param currentBestLocation
+    * @return 
+    */
+   private boolean isBetterLocation(Location location, Location currentBestLocation) {
+      
+      if(currentBestLocation == null) {
+         //A new location is always better than no location
+         return true;
+      }
+      
+      //Check whether the new location fix is newer or older.
+      long timeDelta = location.getTime() - currentBestLocation.getTime();
+      boolean isSignificantlyNewer = timeDelta > MAX_LOCATION_UPDATE_TIME;
+      boolean isSignificantlyOlder = timeDelta < -MAX_LOCATION_UPDATE_TIME;
+      boolean isNewer = timeDelta > 0;
+      
+      // If it's been more than two minutes since the current location, use the new location
+      // because the user has likely moved
+      if (isSignificantlyNewer) {
+          return true;
+      // If the new location is more than two minutes older, it must be worse
+      } else if (isSignificantlyOlder) {
+          return false;
+      }
+
+      int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+      boolean isLessAccurate = accuracyDelta > 0;
+      boolean isMoreAccurate = accuracyDelta < 0;
+      boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+      // Check if the old and new location are from the same provider
+      boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                                                  currentBestLocation.getProvider());
+
+      // Determine location quality using a combination of timeliness and accuracy
+      if (isMoreAccurate) {
+          return true;
+      } else if (isNewer && !isLessAccurate) {
+          return true;
+      } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+          return true;
+      }
+      return false;
+   }
+
+   /**
+    * Helper method to check whether both the providers are same or not.
+    * @param provider1
+    * @param provider2
+    * @return
+    */
+   private boolean isSameProvider(String provider1, String provider2) {
+      if (provider1 == null) {
+        return provider2 == null;
+      }
+      return provider1.equals(provider2);
+  }
+   
    /////////////////////// Inner classes /////////////////////////////
 
    private class ContactSyncCallback implements Callback<Void> {
@@ -514,38 +541,6 @@ OnItemClickListener
      }
    }
    
-   private class SendETACallback implements Callback<Void> {
-      private Context context;
-      private String receiverPhone;
-      public SendETACallback(Context context, String phone) {
-         this.context = context;
-         this.receiverPhone = phone;
-      }
-      @Override
-      public void failure(RetrofitError error) {
-         Toast.makeText(context, 
-                        "Server error : " + error.getMessage(), 
-                        Toast.LENGTH_SHORT).show();
-         Log.e(TAG, error.getMessage(), error.getCause());
-         if(progressDialog.isShowing()) {
-            progressDialog.dismiss();
-         }
-      }
-
-      @Override
-      public void success(Void voidResult, Response response) {
-         
-         if(response.getStatus() == TransportService.RESPONSE_STATUS_OK){
-            Toast.makeText(context, "ETA sent successfully to " + receiverPhone, Toast.LENGTH_SHORT).show();
-         }
-            
-        Log.d(TAG, "Status Code : " + response.getStatus() + ", body : " + response.getBody());
-        if(progressDialog.isShowing()) {
-           progressDialog.dismiss();
-        }
-      }
-   }
-
    class ContactListAdapter extends BaseAdapter {
       Context context;
       LayoutInflater inflater;
@@ -592,27 +587,13 @@ OnItemClickListener
 
          btn.setOnClickListener(new Button.OnClickListener() {
             public void onClick(View v) {
-               
-               if(!isLocationAvailable()) {
-                  currentLocation = locationManager.getLastKnownLocation(locationProvider);
+               if (contactList.get(position).isRegistered()) {
+                  //Send notification.
+                  sendETANotification(contactList.get(position).getPhone());
+
+               } else {
+                  updateUnregisteredContact(contactList.get(position));
                }
-               Log.d(TAG, "Location : " + currentLocation);
-              
-                  if (contactList.get(position).isRegistered()) {
-                     if(isLocationAvailable()) {
-                     Log.d(TAG,  "Location : " + Utility.getLatLng(context, 
-                           locationManager.getLastKnownLocation(locationProvider)));
-                     //Send notification.
-                     sendETANotification(locationManager.getLastKnownLocation(locationProvider), 
-                                         contactList.get(position).getPhone());
-                     } else {
-                        Toast.makeText(context, 
-                                       "Couldn't send ETA because location is not available", 
-                                       Toast.LENGTH_SHORT).show();
-                     }
-                  } else {
-                     updateUnregisteredContact(contactList.get(position));
-                  }
             }
          });
 
@@ -622,31 +603,18 @@ OnItemClickListener
        * This method sends ETA notification request to ETA-Server.
        * @param location
        */
-      private void sendETANotification(Location location, String receiverPhone) {
-         //Show progress bar, and dismiss it in Retrofit callback methods.
-         progressDialog.show();
-         TransportService service = TransportServiceHelper.getTransportService();
+      private void sendETANotification(String receiverPhone) {
          String senderPhone = Utility.purgePhoneNumber(Utility.getDevicePhoneNumber(context));
          //Get User name from shared preferences.
          String senderName = ApplicationSharedPreferences.getUserName(context);
-         ETANotificationRequest request = new ETANotificationRequest(receiverPhone, 
-                                                                     senderPhone,
-                                                                     senderName,
-                                                                     //src Latitude
-                                                                     location.getLatitude(),
-                                                                     //src Longitude
-                                                                     location.getLongitude(),
-                                                                     //dst Latitude
-                                                                     0.0D, 
-                                                                     //dst Longitude
-                                                                     0.0D, 
-                                                                     //ETA
-                                                                     0);
-         service.sendETA(request,
-                         TransportService.HEADER_CONTENT_TYPE_JSON,
-                         TransportService.HEADER_ACCEPT_JSON, 
-                         new SendETACallback(context, receiverPhone));
+        Intent intent = new Intent(context, SendEtaService.class);
+        intent.putExtra(SendEtaService.RECEIVER_PHONE_NUMBER, receiverPhone);
+        intent.putExtra(SendEtaService.SENDER_PHONE_NUMBER, senderPhone);
+        intent.putExtra(SendEtaService.SENDER_NAME, senderName);
+        context.startService(intent);
+        Toast.makeText(context, "Going to send ETA in few moments", Toast.LENGTH_SHORT).show();
       }
+      
       private void updateUnregisteredContact(final ContactDetails contact){
          
          AlertDialog alert = new AlertDialog.Builder(context).create();

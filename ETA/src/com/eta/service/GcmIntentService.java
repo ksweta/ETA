@@ -1,4 +1,4 @@
-package com.eta;
+package com.eta.service;
 
 
 
@@ -15,6 +15,10 @@ import android.support.v4.app.NotificationCompat;
 import android.text.Html;
 import android.util.Log;
 
+import com.eta.GcmBroadcastReceiver;
+import com.eta.R;
+import com.eta.ViewETAActivity;
+import com.eta.R.drawable;
 import com.eta.util.ApplicationConstants;
 import com.eta.util.Utility;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -88,7 +92,7 @@ public class GcmIntentService extends IntentService {
       Log.d(TAG, " Content Text : " + contentText);
       mNotificationManager = (NotificationManager)
             this.getSystemService(Context.NOTIFICATION_SERVICE);
-
+      
       // This intent will have almost the same parameters that are passed in
       // GCM broadcast intent. These parameters will be used by View Activity 
       // to show the sender on the map.
