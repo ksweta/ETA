@@ -74,7 +74,7 @@ OnItemClickListener
    private List<ContactDetails> contactList;
    private DBHelper db;
    private ContactListAdapter contactListAdapter;
-   
+   private AlertDialog networkDialog;
   
    
    @Override
@@ -95,7 +95,8 @@ OnItemClickListener
 
       //If GPS is disabled then show an alert to User.
       if(!Utility.isLocationServiceEnabled(this)){
-         Utility.getEnableLocationServiceAlertDialog(this).show();
+         networkDialog =  Utility.getEnableLocationServiceAlertDialog(this);
+         networkDialog.show();
       }
 
       lvContacts.setOnItemClickListener(this);
@@ -297,6 +298,10 @@ OnItemClickListener
    @Override
    protected void onPause() {
      super.onPause();
+     //Remove network dialog to avoid any window leak if it is displayed.
+     if(networkDialog != null) {
+        networkDialog.dismiss();
+     }
    }
 
    @Override 

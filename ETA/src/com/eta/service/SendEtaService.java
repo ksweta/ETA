@@ -28,6 +28,7 @@ import com.eta.location.LocationCriteriaFactory;
 import com.eta.transport.ETANotificationRequest;
 import com.eta.transport.TransportService;
 import com.eta.transport.TransportServiceHelper;
+import com.eta.util.ApplicationConstants;
 /**
  * This 
  *
@@ -75,8 +76,8 @@ LocationListener {
                                              0, //Minimum time between update in milliseconds
                                              0, //Minimum distance in meters
                                              this);
-      //Get initial fix
-      getInitialLocationFix();
+      //Get initial location fix
+      getInitialLastKnownLocationFix();
    }
 
    @Override
@@ -86,12 +87,16 @@ LocationListener {
       Log.d(TAG, "onDestroy() => Removing location listener before servervice get destroyed");
       super.onDestroy();
    }
-   
+
    @Override
    protected void onHandleIntent(Intent intent) {
+      //Remove retry notification first if it exists
+      if (intent.hasExtra(ApplicationConstants.NOTIFICATION_ID)) {
+         cancelNotification(intent.getExtras().getInt(ApplicationConstants.NOTIFICATION_ID, -1));
+      }
       //If location is not available then wait for some time.
       int numberOfTries = 0;
-      while(!isLocationAvailable()){
+      while(!isFirstLocationFixAvailable()){
          
          //Sleep for some time.
          try{Thread.sleep(WAIT_TIME_FOR_LOCATION);} 
@@ -99,7 +104,7 @@ LocationListener {
          
          //Increment try counter.
          numberOfTries++;
-         if(numberOfTries > MAX_TRY_FOR_LOCATION) {
+         if(numberOfTries > MAX_TRY_FOR_LOCATION && !isLocationAvailable()) {
             // Notify user about the failure and suggest 
             // him some action that he can take.
             //Show failed ETA request notification to user.
@@ -116,6 +121,16 @@ LocationListener {
       
       sendEtaNotification(intent);
    }
+   /**
+    * This is a helper method to cancel the notification.
+    * @param notificationId 
+    */
+   private void cancelNotification(int notificationId) {
+      if(notificationId > 0) {
+         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+         notificationManager.cancel(notificationId);
+      }
+   }
 
    @Override
    public void onLocationChanged(Location location) {
@@ -123,7 +138,7 @@ LocationListener {
          setFirstLocationFixAvailable(true);
        //If first fix is available then switch to fine coarse location provider
          String newLocationProvider  = locationManager.getBestProvider(LocationCriteriaFactory.createFineCriteria(), 
-                                                                   true);
+                                                                       true);
          if(currentLocationProvider != null 
                && !currentLocationProvider.equals(newLocationProvider)) {
             //If new location provider is found then change the current location provider.
@@ -264,7 +279,7 @@ LocationListener {
     * This methods gets location from all location provider and returns the best location
     * among them. 
     */
-   private void getInitialLocationFix() {
+   private void getInitialLastKnownLocationFix() {
       List<String> matchingProviders = locationManager.getAllProviders();
       for (String provider: matchingProviders) {
          Location location = locationManager.getLastKnownLocation(provider);
@@ -358,19 +373,21 @@ LocationListener {
       int iUniqueId = 0;
      
       iUniqueId = (int) (System.currentTimeMillis()  & 0xFFFFFF);
-      PendingIntent pInentSetting = PendingIntent.getActivity(this, 
+      Log.d(TAG, "iUniqueId 1: " + iUniqueId);
+      PendingIntent pInentSetting = PendingIntent.getActivity(getApplicationContext(), 
                                                                 iUniqueId, 
                                                                 new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS), 
-                                                                0);
-      iUniqueId = (int) (System.currentTimeMillis()  & 0xFFFFFF);
+                                                                PendingIntent.FLAG_UPDATE_CURRENT);
+      Intent retryIntent  = new Intent(getApplicationContext(), SendEtaService.class);
+      Bundle extra = intent.getExtras();
+      //This is required for canceling the notification.
+      extra.putInt(ApplicationConstants.NOTIFICATION_ID, iUniqueId);
+      retryIntent.putExtras(extra);
       
-      Intent retryIntent  = new Intent(this, SendEtaService.class);
-      retryIntent.putExtras(intent.getExtras());
-      
-      PendingIntent pIntentRetry = PendingIntent.getActivity(this, 
+      PendingIntent pIntentRetry = PendingIntent.getService(getApplicationContext(), 
                                                              iUniqueId, 
-                                                             intent,
-                                                             0);
+                                                             retryIntent,
+                                                             PendingIntent.FLAG_UPDATE_CURRENT);
       Log.d(TAG, "Intent info: " + retryIntent.getClass() + ", package: " + retryIntent.getPackage());
       
       //Prepare the notification
@@ -384,7 +401,7 @@ LocationListener {
                                                                   .setOngoing(false);
       //Set the Actions
       builder.addAction(R.drawable.gps, "Enable", pInentSetting);
-      //builder.addAction(R.drawable.retry, "Retry", pIntentRetry);
+      builder.addAction(R.drawable.retry, "Retry", pIntentRetry);
       //Set the notification sound
       Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
       builder.setSound(alarmSound);
@@ -392,7 +409,7 @@ LocationListener {
       Notification notification = builder.build();
       
      NotificationManager notificationManager = (NotificationManager)
-            this.getSystemService(Context.NOTIFICATION_SERVICE);
+            getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
       notificationManager.notify(iUniqueId, notification);
    }
    
